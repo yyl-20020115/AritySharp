@@ -24,13 +24,10 @@ public class RPN(SyntaxException exception) : TokenConsumer
 {
     Stack<Token> stack = new();
     int prevTokenId = 0;
-    TokenConsumer consumer;
+    TokenConsumer? consumer;
     SyntaxException exception = exception;
 
-    public void SetConsumer(TokenConsumer consumer)
-    {
-        this.consumer = consumer;
-    }
+    public void SetConsumer(TokenConsumer consumer) => this.consumer = consumer;
 
     // @Override
 
@@ -38,7 +35,7 @@ public class RPN(SyntaxException exception) : TokenConsumer
     {
         stack.Clear();
         prevTokenId = 0;
-        consumer.Start();
+        consumer?.Start();
     }
 
     private Token? Top() => stack.Count == 0 ? null : stack.Peek();
@@ -48,17 +45,14 @@ public class RPN(SyntaxException exception) : TokenConsumer
         Token? t = Top();
         while (t != null && t.priority >= priority)
         {
-            consumer.Push(t);
+            consumer?.Push(t);
             // code.push(t);
             stack.Pop();
             t = Top();
         }
     }
 
-    static bool IsOperand(int id)
-    {
-        return id == Lexer.FACT || id == Lexer.RPAREN || id == Lexer.NUMBER || id == Lexer.CONST || id == Lexer.PERCENT;
-    }
+    static bool IsOperand(int id) => id == Lexer.FACT || id == Lexer.RPAREN || id == Lexer.NUMBER || id == Lexer.CONST || id == Lexer.PERCENT;
 
     public override void Push(Token token)
     {
@@ -72,7 +66,7 @@ public class RPN(SyntaxException exception) : TokenConsumer
                 {
                     Push(Lexer.TOK_MUL);
                 }
-                consumer.Push(token);
+                consumer?.Push(token);
                 break;
 
             case Lexer.RPAREN:
@@ -110,7 +104,7 @@ public class RPN(SyntaxException exception) : TokenConsumer
                         throw exception.Set("misplaced COMMA", token.position);
                     }
                     PopHigher(priority);
-                    Token t = Top();
+                    Token? t = Top();
                     if (t == null || t.id != Lexer.CALL)
                     {
                         throw exception.Set("COMMA not inside CALL", token.position);

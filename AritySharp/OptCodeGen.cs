@@ -23,7 +23,7 @@ namespace AritySharp;
  */
 
 public class OptCodeGen  :  SimpleCodeGen {
-    readonly EvalContext context = new EvalContext();
+    readonly EvalContext context = new ();
     int sp;
     readonly Complex[] stack;
 
@@ -53,7 +53,7 @@ public class OptCodeGen  :  SimpleCodeGen {
     //@Override
     public override void Push(Token token) {
         // System.err.println("state " + getFun(0) + "; token " + token);
-        bool prevWasPercent = isPercent;
+        var prevWasPercent = isPercent;
         isPercent = false;
         byte op;
         switch (token.id) {
@@ -76,7 +76,7 @@ public class OptCodeGen  :  SimpleCodeGen {
                     if (arg + 1 > intrinsicArity) {
                         intrinsicArity = arg + 1;
                     }
-                    stack[++sp].re = Double.NaN;
+                    stack[++sp].re = double.NaN;
                     stack[sp].im = 0;
                     code.Push(op);
                     //System.out.println("op " + VM.opcodeName[op] + "; sp " + sp + "; top " + stack[sp]);
@@ -95,7 +95,7 @@ public class OptCodeGen  :  SimpleCodeGen {
         default:
             op = token.vmop;
             if (op <= 0) {
-                throw new Exception("wrong vmop: " + op);
+                throw new Exception($"wrong vmop: {op}");
             }
             if (op == VM.PERCENT) {
                 isPercent = true;
@@ -107,7 +107,7 @@ public class OptCodeGen  :  SimpleCodeGen {
         if (op != VM.RND) {
             sp = tracer.ExecWithoutCheckComplex(context, sp, prevWasPercent ? -1 : -2);
         } else {
-            stack[++sp].re = Double.NaN;
+            stack[++sp].re = double.NaN;
             stack[sp].im = 0;
         }
 
@@ -115,16 +115,16 @@ public class OptCodeGen  :  SimpleCodeGen {
             
         //constant folding
         if (!stack[sp].IsNaN || op == VM.CONST) {
-            int nPopCode = op==VM.CALL ? traceFuncs[0].GetArity() : VM.arity[op];
+            int nPopCode = op==VM.CALL ? traceFuncs[0].Arity : VM.Arity[op];
             while (nPopCode > 0) {
                  byte pop = code.Pop();
                 if (pop == VM.CONST) {
                     consts.Pop();
                 } else if (pop == VM.CALL) {
                     Function f = funcs.Pop();
-                    nPopCode += f.GetArity() - 1;
+                    nPopCode += f.Arity - 1;
                 } else {
-                    nPopCode += VM.arity[pop];
+                    nPopCode += VM.Arity[pop];
                 }
                 --nPopCode;
             }
@@ -136,7 +136,5 @@ public class OptCodeGen  :  SimpleCodeGen {
         code.Push(op);
     }
 
-    public CompiledFunction GetFun(int arity) {
-        return new CompiledFunction(arity, code.ToArray(), consts.GetRe(), consts.GetIm(), funcs.ToArray());
-    }
+    public CompiledFunction GetFun(int arity) => new(arity, code.ToArray(), consts.GetRe(), consts.GetIm(), funcs.ToArray());
 }

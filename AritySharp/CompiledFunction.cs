@@ -33,82 +33,61 @@ namespace AritySharp;
    eval() methods.
  */
 
-public class CompiledFunction : ContextFunction
+public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[] constsIm, Function[] funcs) : ContextFunction
 {
-    private static readonly IsComplexException IS_COMPLEX = new ();
-    private static readonly Random random = new ();
+    private static readonly IsComplexException IS_COMPLEX = new();
+    private static readonly Random random = new();
     private static readonly double[] EMPTY_DOUBLE = [];
     private static readonly Function[] EMPTY_FUN = [];
-    private static readonly Complex ONE_THIRD = new (1 / 3.0, 0);
+    private static readonly Complex ONE_THIRD = new(1 / 3.0, 0);
 
-    private readonly double[] constsRe, constsIm;
+    private readonly double[] constsRe = constsRe, constsIm = constsIm;
 
-    private readonly Function[] funcs;
-    private readonly byte[] code;
-    private readonly int _arity; // >= 0
+    private readonly Function[] funcs = funcs;
+    private readonly byte[] code = code;
+    private readonly int _arity = arity; // >= 0
 
-    public CompiledFunction(int arity, byte[] code, double[] constsRe, double[] constsIm, Function[] funcs)
+    private class CompareFunction : Function
     {
-        this._arity = arity;
-        this.code = code;
-        this.constsRe = constsRe;
-        this.constsIm = constsIm;
-        this.funcs = funcs;
+        public override int Arity => 1;
+        public override double Eval(double x) => x > 0 ? 1 : x < 0 ? -1 : 0;
     }
-    private class FC : Function
+    public static Function MakeOpFunction(int op)
     {
-        public override int GetArity()
-        {
-            return 1;
-        }
-
-        public override double Eval(double x)
-        {
-            return x > 0 ? 1 : x < 0 ? -1 : 0;
-        }
-    }
-    public static Function makeOpFunction(int op)
-    {
-        if (VM.arity[op] != 1)
-        {
-            throw new Exception("makeOpFunction expects arity 1, found " + VM.arity[op]);
-        }
-        CompiledFunction fun = new CompiledFunction(VM.arity[op], new byte[] { VM.LOAD0, (byte)op }, EMPTY_DOUBLE, EMPTY_DOUBLE, EMPTY_FUN);
+        if (VM.Arity[op] != 1)
+            throw new Exception("makeOpFunction expects arity 1, found " + VM.Arity[op]);
+        var fun = new CompiledFunction(VM.Arity[op], [VM.LOAD0, (byte)op], EMPTY_DOUBLE, EMPTY_DOUBLE, EMPTY_FUN);
         if (op == VM.ABS)
         {
-            fun.            Derivative = new FC();
+            fun.Derivative = new CompareFunction();
         }
         return fun;
     }
 
-    //@Override
-    public override int GetArity()
-    {
-        return _arity;
-    }
+    public override int Arity => _arity;
 
-    public string toString()
+    public override string ToString()
     {
-        StringBuilder buf = new StringBuilder();
+        var builder = new StringBuilder();
         int cpos = 0, fpos = 0;
         if (_arity != 0)
         {
-            buf.Append("arity ").Append(_arity).Append("; ");
+            builder.Append("arity ").Append(_arity).Append("; ");
         }
         for (int i = 0; i < code.Length; ++i)
         {
             byte op = code[i];
-            buf.Append(VM.opcodeName[op]);
+            builder.Append(VM.OpcodeName[op]);
             if (op == VM.CONST)
             {
-                buf.Append(' ');
+                builder.Append(' ');
                 if (constsIm == null)
                 {
-                    buf.Append(constsRe[cpos]);
+                    builder.Append(constsRe[cpos]);
                 }
                 else
                 {
-                    buf.Append('(').Append(constsRe[cpos]).Append(", ").Append(constsIm[cpos]).Append(')');
+                    builder.Append('(').Append(constsRe[cpos]).Append(", ").Append(constsIm[cpos]).Append(')');
                 }
                 ++cpos;
             }
@@ -117,33 +96,30 @@ public class CompiledFunction : ContextFunction
                 ++fpos;
                 //buf.append(" {").append(funcs[fpos++].toString()).append('}');
             }
-            buf.Append("; ");
+            builder.Append("; ");
         }
         if (cpos != constsRe.Length)
         {
-            buf.Append("\nuses only ").Append(cpos).Append(" consts out of ").Append(constsRe.Length);
+            builder.Append("\nuses only ").Append(cpos).Append(" consts out of ").Append(constsRe.Length);
         }
         if (fpos != funcs.Length)
         {
-            buf.Append("\nuses only ").Append(fpos).Append(" funcs out of ").Append(funcs.Length);
+            builder.Append("\nuses only ").Append(fpos).Append(" funcs out of ").Append(funcs.Length);
         }
-        return buf.ToString();
+        return builder.ToString();
     }
 
     public override double Eval(double[] args, EvalContext context)
     {
-        if (constsIm != null)
-        {
-            return EvalComplexToReal(args, context);
-        }
+        if (constsIm != null) return EvalComplexToReal(args, context);
         CheckArity(args.Length);
         Array.Copy(args, 0, context.stackRe, context.stackBase, args.Length);
         try
         {
-            execReal(context, context.stackBase + args.Length - 1);
+            ExecReal(context, context.stackBase + args.Length - 1);
             return context.stackRe[context.stackBase];
         }
-        catch (IsComplexException e)
+        catch (IsComplexException)
         {
             return EvalComplexToReal(args, context);
         }
@@ -151,15 +127,15 @@ public class CompiledFunction : ContextFunction
 
     private double EvalComplexToReal(double[] args, EvalContext context)
     {
-        Complex[] argsC = ToComplex(args, context);
-        Complex c = Eval(argsC, context);
+        var argsC = ToComplex(args, context);
+        var c = Eval(argsC, context);
         return c.AsReal;
     }
 
     public override Complex Eval(Complex[] args, EvalContext context)
     {
         CheckArity(args.Length);
-        Complex[] stack = context.stackComplex;
+        var stack = context.stackComplex;
         int _base = context.stackBase;
         for (int i = 0; i < args.Length; ++i)
         {
@@ -169,15 +145,13 @@ public class CompiledFunction : ContextFunction
         return stack[_base];
     }
 
-    private int execReal(EvalContext context, int p)
+    private int ExecReal(EvalContext context, int p)
     {
         int expected = p + 1;
         p = ExecWithoutCheck(context, p);
         if (p != expected)
-        {
             throw new Exception("Stack pointer after exec: expected " +
                             expected + ", got " + p);
-        }
         context.stackRe[p - _arity] = context.stackRe[p];
         return p - _arity;
     }
@@ -187,22 +161,17 @@ public class CompiledFunction : ContextFunction
         int expected = p + 1;
         p = ExecWithoutCheckComplex(context, p, -2);
         if (p != expected)
-        {
             throw new Exception("Stack pointer after exec: expected " +
                             expected + ", got " + p);
-        }
         context.stackComplex[p - _arity].Set(context.stackComplex[p]);
         return p - _arity;
     }
 
     public int ExecWithoutCheck(EvalContext context, int p)
     {
-        if (constsIm != null)
-        {
-            throw IS_COMPLEX;
-        }
+        if (constsIm != null) throw IS_COMPLEX;
 
-        double[] s = context.stackRe;
+        var s = context.stackRe;
 
         int stackBase = p - _arity;
         int constp = 0;
@@ -218,17 +187,16 @@ public class CompiledFunction : ContextFunction
                 case VM.CONST:
                     s[++p] = constsRe[constp++];
                     break;
-
                 case VM.CALL:
                     {
                         Function f = funcs[funp++];
-                        if (f is CompiledFunction)
+                        if (f is CompiledFunction function)
                         {
-                            p = ((CompiledFunction)f).execReal(context, p);
+                            p = function.ExecReal(context, p);
                         }
                         else
                         {
-                            int arity = f.GetArity();
+                            int arity = f.Arity;
                             p -= arity;
                             double result;
                             int prevBase = context.stackBase;
@@ -359,7 +327,7 @@ public class CompiledFunction : ContextFunction
                 case VM.SIGN:
                     {
                         double v = s[p];
-                        s[p] = v > 0 ? 1 : v < 0 ? -1 : v == 0 ? 0 : Double.NaN;
+                        s[p] = v > 0 ? 1 : v < 0 ? -1 : v == 0 ? 0 : double.NaN;
                         break;
                     }
 
@@ -382,7 +350,7 @@ public class CompiledFunction : ContextFunction
                     break; // NOP
 
                 case VM.IMAG:
-                    if (!Double.IsNaN(s[p]))
+                    if (!double.IsNaN(s[p]))
                     {
                         s[p] = 0;
                     }
@@ -397,7 +365,7 @@ public class CompiledFunction : ContextFunction
 
     public int ExecWithoutCheckComplex(EvalContext context, int p, int percentPC)
     {
-        Complex[] s = context.stackComplex;
+        var s = context.stackComplex;
 
         int stackBase = p - _arity;
         int constp = 0;
@@ -419,14 +387,14 @@ public class CompiledFunction : ContextFunction
 
                 case VM.CALL:
                     {
-                        Function f = funcs[funp++];
-                        if (f is CompiledFunction)
+                        var f = funcs[funp++];
+                        if (f is CompiledFunction function)
                         {
-                            p = ((CompiledFunction)f).ExecComplex(context, p);
+                            p = function.ExecComplex(context, p);
                         }
                         else
                         {
-                            int arity = f.GetArity();
+                            int arity = f.Arity;
                             p -= arity;
                             Complex result;
                             int prevBase = context.stackBase;
@@ -445,7 +413,7 @@ public class CompiledFunction : ContextFunction
                                         result = f.Eval(s[p + 1], s[p + 2]);
                                         break;
                                     default:
-                                        Complex[] args = new Complex[arity];
+                                        var args = new Complex[arity];
                                         Array.Copy(s, p + 1, args, 0, arity);
                                         result = f.Eval(args);
                                         break;
@@ -511,7 +479,7 @@ public class CompiledFunction : ContextFunction
                         double b = s[p].im;
                         if (b == 0)
                         {
-                            s[p].Set(a > 0 ? 1 : a < 0 ? -1 : a == 0 ? 0 : Double.NaN, 0);
+                            s[p].Set(a > 0 ? 1 : a < 0 ? -1 : a == 0 ? 0 : double.NaN, 0);
                         }
                         else if (!s[p].IsNaN)
                         {
@@ -520,7 +488,7 @@ public class CompiledFunction : ContextFunction
                         }
                         else
                         {
-                            s[p].Set(Double.NaN, 0);
+                            s[p].Set(double.NaN, 0);
                         }
                         break;
                     }
@@ -563,11 +531,11 @@ public class CompiledFunction : ContextFunction
                     break;
 
                 case VM.REAL:
-                    s[p].Set(s[p].IsNaN ? Double.NaN : s[p].re, 0);
+                    s[p].Set(s[p].IsNaN ? double.NaN : s[p].re, 0);
                     break;
 
                 case VM.IMAG:
-                    s[p].Set(s[p].IsNaN ? Double.NaN : s[p].im, 0);
+                    s[p].Set(s[p].IsNaN ? double.NaN : s[p].im, 0);
                     break;
 
                 default:

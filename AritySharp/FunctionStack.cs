@@ -44,7 +44,7 @@ public class FunctionStack
 
     public Function[] ToArray()
     {
-        Function[] trimmed = new Function[size];
+        var trimmed = new Function[size];
         Array.Copy(data, 0, trimmed, 0, size);
         return trimmed;
     }

@@ -31,10 +31,10 @@ public class MoreMath
 
     public static double Gcd(double x, double y)
     {
-        if (Double.IsNaN(x) || Double.IsNaN(y) ||
-            Double.IsInfinity(x) || Double.IsInfinity(y))
+        if (double.IsNaN(x) || double.IsNaN(y) ||
+            double.IsInfinity(x) || double.IsInfinity(y))
         {
-            return Double.NaN;
+            return double.NaN;
         }
         x = Math.Abs(x);
         y = Math.Abs(y);
@@ -108,7 +108,7 @@ public class MoreMath
     {
         if (x < 0)
         { // x <= -1 ?
-            return Double.NaN;
+            return double.NaN;
         }
         if (x <= 170)
         {
@@ -148,7 +148,7 @@ public class MoreMath
 
     public static double Combinations(double n, double k)
     {
-        if (n < 0 || k < 0) { return Double.NaN; }
+        if (n < 0 || k < 0) { return double.NaN; }
         if (n < k) { return 0; }
         if (Math.Floor(n) == n && Math.Floor(k) == k)
         {
@@ -160,7 +160,7 @@ public class MoreMath
             else
             {
                 double r = 1, diff = n - k;
-                for (double i = k; i > .5 && r < Double.PositiveInfinity; --i)
+                for (double i = k; i > .5 && r < double.PositiveInfinity; --i)
                 {
                     r *= (diff + i) / i;
                 }
@@ -175,7 +175,7 @@ public class MoreMath
 
     public static double Permutations(double n, double k)
     {
-        if (n < 0 || k < 0) { return Double.NaN; }
+        if (n < 0 || k < 0) { return double.NaN; }
         if (n < k) { return 0; }
         if (Math.Floor(n) == n && Math.Floor(k) == k)
         {
@@ -186,7 +186,7 @@ public class MoreMath
             else
             {
                 double r = 1, limit = n - k + .5;
-                for (double i = n; i > limit && r < Double.PositiveInfinity; --i)
+                for (double i = n; i > limit && r < double.PositiveInfinity; --i)
                 {
                     r *= i;
                 }

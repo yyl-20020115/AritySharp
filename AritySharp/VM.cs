@@ -67,10 +67,10 @@ public class VM
         REAL = 43,
         IMAG = 44;
 
-    public static readonly string[] opcodeName = ["reserved", "const", "call", "add", "sub", "mul", "div", "mod", "rnd", "umin", "power", "fact", "percent", "sqrt", "cbrt", "exp", "ln", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "abs", "floor", "ceil", "sign", "min", "max", "gcd", "comb", "perm", "load0", "load1", "load2", "load3", "load4", "real", "imag"];
+    public static readonly string[] OpcodeName = ["reserved", "const", "call", "add", "sub", "mul", "div", "mod", "rnd", "umin", "power", "fact", "percent", "sqrt", "cbrt", "exp", "ln", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh", "abs", "floor", "ceil", "sign", "min", "max", "gcd", "comb", "perm", "load0", "load1", "load2", "load3", "load4", "real", "imag"];
 
-    public static readonly byte[] arity = [0, 0, 0xff, 2, 2, 2, 2, 2, 0, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1, 1];
+    public static readonly byte[] Arity = [0, 0, 0xff, 2, 2, 2, 2, 2, 0, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 1, 1];
 
-    public static readonly byte[] builtins = [RND, SQRT, CBRT, SIN, COS, TAN, ASIN, ACOS, ATAN, SINH, COSH, TANH, ASINH, ACOSH, ATANH, EXP, LN, ABS, FLOOR, CEIL, SIGN, MIN, MAX, GCD, COMB, PERM, MOD, REAL, IMAG];
+    public static readonly byte[] Builtins = [RND, SQRT, CBRT, SIN, COS, TAN, ASIN, ACOS, ATAN, SINH, COSH, TANH, ASINH, ACOSH, ATANH, EXP, LN, ABS, FLOOR, CEIL, SIGN, MIN, MAX, GCD, COMB, PERM, MOD, REAL, IMAG];
 
 }

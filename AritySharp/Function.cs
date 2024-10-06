@@ -26,7 +26,8 @@ namespace AritySharp;
    If the user subclasses Function, he is responsible for the thread-safety of 
    his user-defined Functions.
  */
-public abstract class Function {
+public abstract class Function
+{
     private Function? cachedDerivate;
     public string? comment;
 
@@ -34,12 +35,10 @@ public abstract class Function {
        Gives the arity of this function. 
        @return the arity (the number of arguments). Arity >= 0.
     */
-    public abstract int GetArity();
-
+    public abstract int Arity { get; }
     public Function Derivative
     {
         get => cachedDerivate ??= new Derivative(this);
-
         set => cachedDerivate = value;
     }
 
@@ -78,7 +77,8 @@ public abstract class Function {
      *  otherwise returns NaN.
      *  This allow calling any real functions as a (restricted) complex one.
      */
-    public virtual Complex EvalComplex() {
+    public virtual Complex EvalComplex()
+    {
         CheckArity(0);
         return new Complex(Eval(), 0);
     }
@@ -86,7 +86,8 @@ public abstract class Function {
     /**
        Complex evaluates a function with a single argument.
     */
-    public virtual Complex Eval(Complex x) {
+    public virtual Complex Eval(Complex x)
+    {
         CheckArity(1);
         return new Complex(x.im == 0 ? Eval(x.re) : double.NaN, 0);
     }
@@ -94,7 +95,8 @@ public abstract class Function {
     /**
        Complex evaluates a function with two arguments.
      */
-    public virtual Complex Eval(Complex x, Complex y) {
+    public virtual Complex Eval(Complex x, Complex y)
+    {
         CheckArity(2);
         return new Complex(x.im == 0 && y.im == 0 ? Eval(x.re, y.re) : double.NaN, 0);
     }
@@ -102,32 +104,35 @@ public abstract class Function {
     /**
        Complex evaluates a function with an arbitrary number of arguments.
     */
-    public virtual Complex Eval(Complex[] args) {
-        switch (args.Length) {
-        case 0:
-            return EvalComplex();
-        case 1:
-            return Eval(args[0]);
-        case 2:
-            return Eval(args[0], args[1]);
-        default:
-            int len = args.Length;
-            CheckArity(len);
-            double[] reArgs = new double[len];
-            for (int i = args.Length - 1; i >= 0; --i) {
-                if (args[i].im != 0) {
-                    return new Complex(Double.NaN, 0);
+    public virtual Complex Eval(Complex[] args)
+    {
+        switch (args.Length)
+        {
+            case 0:
+                return EvalComplex();
+            case 1:
+                return Eval(args[0]);
+            case 2:
+                return Eval(args[0], args[1]);
+            default:
+                int len = args.Length;
+                CheckArity(len);
+                double[] reArgs = new double[len];
+                for (int i = args.Length - 1; i >= 0; --i)
+                {
+                    if (args[i].im != 0)
+                    {
+                        return new Complex(double.NaN, 0);
+                    }
+                    reArgs[i] = args[i].re;
                 }
-                reArgs[i] = args[i].re;
-            }
-            return new Complex(Eval(reArgs), 0);
+                return new Complex(Eval(reArgs), 0);
         }
     }
 
     public virtual void CheckArity(int nArgs)
     {
-        if (GetArity() != nArgs) {
-            throw new ArityException("Expected " + GetArity() + " arguments, got " + nArgs);
-        }        
+        if (Arity != nArgs)
+            throw new ArityException($"Expected {Arity} arguments, got {nArgs}");
     }
 }

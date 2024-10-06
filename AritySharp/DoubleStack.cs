@@ -16,15 +16,18 @@
 
 namespace AritySharp;
 
-public class DoubleStack {
+public class DoubleStack
+{
     private double[] re = new double[8];
     private double[] im = new double[8];
     private int size = 0;
 
     public void Clear() => this.size = 0;
 
-    public void Push(double a, double b) {
-        if (size >= re.Length) {
+    public void Push(double a, double b)
+    {
+        if (size >= re.Length)
+        {
             int newSize = re.Length << 1;
             double[] newRe = new double[newSize];
             double[] newIm = new double[newSize];
@@ -38,33 +41,35 @@ public class DoubleStack {
         ++size;
     }
 
-    public void Pop(int cnt) {
-        if (cnt > size) {
+    public void Pop(int cnt)
+    {
+        if (cnt > size)
             throw new Exception("pop " + cnt + " from " + size);
-        }
-        size -= cnt;        
+        size -= cnt;
     }
 
-    public void Pop() {
-        --size;
-    }
+    public void Pop() => --size;
 
-    public double[] GetRe() {
-        double[] trimmed = new double[size];
+    public double[] GetRe()
+    {
+        var trimmed = new double[size];
         Array.Copy(re, 0, trimmed, 0, size);
         return trimmed;
     }
 
-    public double[]? GetIm() {
-        bool allZero = true;
-        for (int i = 0; i < size; ++i) {
-            if (im[i] != 0) {
+    public double[]? GetIm()
+    {
+        var allZero = true;
+        for (int i = 0; i < size; ++i)
+        {
+            if (im[i] != 0)
+            {
                 allZero = false;
                 break;
             }
         }
         if (allZero) return null;
-        
+
         var trimmed = new double[size];
         Array.Copy(im, 0, trimmed, 0, size);
         return trimmed;

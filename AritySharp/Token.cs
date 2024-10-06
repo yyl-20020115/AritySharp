@@ -54,5 +54,5 @@ public class Token(int id, int priority, int assoc, int vmop)
         Lexer.CALL => name + '(' + arity + ')',
         Lexer.CONST => name,
         _ => "" + id,
-    };
+    }??"";
 }

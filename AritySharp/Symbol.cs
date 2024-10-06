@@ -37,7 +37,7 @@ public class Symbol
 
     public Symbol(string name, Function fun)
     {
-        SetKey(name, fun.GetArity());
+        SetKey(name, fun.Arity);
         this.fun = fun;
         // this.comment = fun.comment;
     }
@@ -55,19 +55,13 @@ public class Symbol
         this.isConst = isConst;
     }
 
-    public static Symbol MakeArg(string name, int order)
-    {
-        return new Symbol(name, CONST_ARITY, (byte)(VM.LOAD0 + order), false, 0);
-    }
+    public static Symbol MakeArg(string name, int order) => new Symbol(name, CONST_ARITY, (byte)(VM.LOAD0 + order), false, 0);
 
-    public static Symbol MakeVmOp(string name, int op)
-    {
-        return new Symbol(name, (int)VM.arity[op], (byte)op, true, 0);
-    }
+    public static Symbol MakeVmOp(string name, int op) => new Symbol(name, VM.Arity[op], (byte)op, true, 0);
 
     public override string ToString() => $"Symbol '{name}' arity {arity} val {valueRe} op {op}";
 
-    public string GetName() => name;
+    public string Name => name;
 
     /*
     public string GetComment() {
@@ -75,20 +69,11 @@ public class Symbol
     }
     */
 
-    public int GetArity()
-    {
-        return arity == CONST_ARITY ? 0 : arity;
-    }
+    public int GetArity() => arity == CONST_ARITY ? 0 : arity;
 
-    public static Symbol NewEmpty(Symbol s)
-    {
-        return new Symbol(s.name, s.arity, (byte)0, false, 0);
-    }
+    public static Symbol NewEmpty(Symbol s) => new Symbol(s.name, s.arity, (byte)0, false, 0);
 
-    public bool IsEmpty()
-    {
-        return op == 0 && fun == null && valueRe == 0 && valueIm == 0;
-    }
+    public bool IsEmpty() => op == 0 && fun == null && valueRe == 0 && valueIm == 0;
 
     public Symbol SetKey(string name, int arity)
     {
@@ -97,13 +82,7 @@ public class Symbol
         return this;
     }
 
-    public override bool Equals(Object? other)
-    {
-        return other is Symbol symbol && name == (symbol.name) && arity == symbol.arity;
-    }
+    public override bool Equals(object? other) => other is Symbol symbol && name == (symbol.name) && arity == symbol.arity;
 
-    public override int GetHashCode()
-    {
-        return (name??"").GetHashCode() + arity;
-    }
+    public override int GetHashCode() => (name ?? "").GetHashCode() + arity;
 }

@@ -58,9 +58,9 @@ public class Symbols
     static Symbols()
     {
         List<Symbol> vect = [];
-        foreach (byte i in VM.builtins)
+        foreach (byte i in VM.Builtins)
         {
-            vect.Add(Symbol.MakeVmOp(VM.opcodeName[i], i));
+            vect.Add(Symbol.MakeVmOp(VM.OpcodeName[i], i));
         }
 
         string[] IMPLICIT_ARGS = { "x", "y", "z" };
@@ -73,14 +73,14 @@ public class Symbols
         vect.Add(new Symbol("\u03c0", Math.PI, true));
         vect.Add(new Symbol("e", Math.E, true));
 
-        double infinity = Double.PositiveInfinity;
+        double infinity = double.PositiveInfinity;
         vect.Add(new Symbol("Infinity", infinity, true));
         vect.Add(new Symbol("infinity", infinity, true));
         vect.Add(new Symbol("Inf", infinity, true));
         vect.Add(new Symbol("inf", infinity, true));
         vect.Add(new Symbol("\u221e", infinity, true));
-        vect.Add(new Symbol("NaN", Double.NaN, true));
-        vect.Add(new Symbol("nan", Double.NaN, true));
+        vect.Add(new Symbol("NaN", double.NaN, true));
+        vect.Add(new Symbol("nan", double.NaN, true));
 
         vect.Add(new Symbol("i", 0, 1, true));
         vect.Add(new Symbol("j", 0, 1, false));
@@ -323,7 +323,7 @@ public class Symbols
         string[] strings = new string[size];
         for (int i = 0; i < size; ++i)
         {
-            strings[i] = syms[i].GetName();
+            strings[i] = syms[i].Name;
         }
         return strings;
     }
@@ -374,19 +374,15 @@ public class Symbols
         }
         if (!delta.Contains(s))
         {
-            delta.Add(previous != null ? previous : Symbol.NewEmpty(s));
+            delta.Add(previous ?? Symbol.NewEmpty(s));
         }
     }
 
     public Symbol? Lookup(string name, int arity)
     {
         lock (this)
-
             return symbols.TryGetValue(shell.SetKey(name, arity), out var r) ? r : null;
     }
 
-    public Symbol? LookupConst(string name)
-    {
-        return Lookup(name, Symbol.CONST_ARITY);
-    }
+    public Symbol? LookupConst(string name) => Lookup(name, Symbol.CONST_ARITY);
 }

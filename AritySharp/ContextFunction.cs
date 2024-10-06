@@ -6,9 +6,9 @@ public abstract class ContextFunction : Function
     private static readonly double[] NO_ARGS = [];
     private static readonly Complex[] NO_ARGS_COMPLEX = [];
 
-    abstract public double Eval(double[] args, EvalContext context);
+    public abstract double Eval(double[] args, EvalContext context);
 
-    abstract public Complex Eval(Complex[] args, EvalContext context);
+    public abstract Complex Eval(Complex[] args, EvalContext context);
 
     public static Complex[] ToComplex(double[] args, EvalContext context)
     {
@@ -67,14 +67,14 @@ public abstract class ContextFunction : Function
 
     public double Eval(double x, EvalContext context)
     {
-        double[] args = context.args1;
+        var args = context.args1;
         args[0] = x;
         return Eval(args, context);
     }
 
     public double Eval(double x, double y, EvalContext context)
     {
-        double[] args = context.args2;
+        var args = context.args2;
         args[0] = x;
         args[1] = y;
         return Eval(args, context);
@@ -108,14 +108,14 @@ public abstract class ContextFunction : Function
 
     public Complex Eval(Complex x, EvalContext context)
     {
-        Complex[] args = context.args1c;
+        var args = context.args1c;
         args[0] = x;
         return Eval(args, context);
     }
 
     public Complex Eval(Complex x, Complex y, EvalContext context)
     {
-        Complex[] args = context.args2c;
+        var args = context.args2c;
         args[0] = x;
         args[1] = y;
         return Eval(args, context);

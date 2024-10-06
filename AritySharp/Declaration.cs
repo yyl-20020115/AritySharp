@@ -27,11 +27,10 @@ public class Declaration
     public void Parse(string source, Lexer lexer, DeclarationParser declParser)
     {
         int equalPos = source.IndexOf('=');
-        string? decl;
+        string? decl = null;
 
         if (equalPos == -1)
         {
-            decl = null;
             expression = source;
             name = null;
             args = NO_ARGS;

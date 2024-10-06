@@ -84,9 +84,6 @@ public class SymbolsTest
         {
             return f.Eval(x);
         }
-        public override int GetArity()
-        {
-            return 1;
-        }
+        public override int Arity => 1;
     }
 }

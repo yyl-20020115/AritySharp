@@ -29,14 +29,14 @@ public static class Util
     public const int MAX_EXPONENT = 1023;
     public const double MIN_VALUE = 0.0000000000001E-1022; // 4.9e-324
     public static double PowerOfTwoD(int n) =>
-        //assert(n >= Double.MIN_EXPONENT && n <= Double.MAX_EXPONENT);
+        //assert(n >= double.MIN_EXPONENT && n <= double.MAX_EXPONENT);
         BitConverter.Int64BitsToDouble((((long)n + (long)EXP_BIAS) <<
                                         (SIGNIFICAND_WIDTH - 1))
                                        & EXP_BIT_MASK);
     /**
      * Minimum exponent a normalized {@code double} variable may
      * have.  It is equal to the value returned by
-     * {@code Math.getExponent(Double.MIN_NORMAL)}.
+     * {@code Math.getExponent(double.MIN_NORMAL)}.
      *
      * @since 1.6
      */
@@ -62,7 +62,7 @@ public static class Util
                 return MIN_VALUE;
 
             default:
-                //assert exp <= Double.MAX_EXPONENT && exp >= Double.MIN_EXPONENT;
+                //assert exp <= double.MAX_EXPONENT && exp >= double.MIN_EXPONENT;
 
                 // ulp(x) is usually 2^(SIGNIFICAND_WIDTH-1)*(2^ilogb(x))
                 exp = exp - (SIGNIFICAND_WIDTH - 1);
@@ -73,7 +73,7 @@ public static class Util
                 else
                 {
                     // return a subnormal result; left shift integer
-                    // representation of Double.MIN_VALUE appropriate
+                    // representation of double.MIN_VALUE appropriate
                     // number of positions
                     return BitConverter.Int64BitsToDouble(1L <<
                     (exp - (MIN_EXPONENT - (SIGNIFICAND_WIDTH - 1))));
@@ -112,10 +112,7 @@ public static class Util
      */
     public static string SizeTruncate(string str, int maxLen)
     {
-        if (maxLen == LEN_UNLIMITED)
-        {
-            return str;
-        }
+        if (maxLen == LEN_UNLIMITED) return str;
         int ePos = str.LastIndexOf('E');
         string tail = (ePos != -1) ? str[ePos..] : "";
         int tailLen = tail.Length;
@@ -279,11 +276,11 @@ public static class Util
         double xre = x.re, xim = x.im;
         if (x.IsInfinite)
         {
-            if (!Double.IsInfinity(xre))
+            if (!double.IsInfinity(xre))
             {
                 xre = 0;
             }
-            else if (!Double.IsInfinity(xim))
+            else if (!double.IsInfinity(xim))
             {
                 xim = 0;
             }
@@ -297,7 +294,7 @@ public static class Util
         bool addPlus = xre != 0 && !(xim < 0);
         string sre = xre == 0 ? "" : DoubleToString(xre, rounding);
         string sim = DoubleToString(xim, rounding);
-        string finalMultiply = Double.IsInfinity(xim) ? "*" : "";
+        string finalMultiply = double.IsInfinity(xim) ? "*" : "";
 
         if (sim == ("1"))
         {

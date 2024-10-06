@@ -31,9 +31,7 @@ public class Constant(Complex o) : Function
      */
     public override double Eval() => value.AsReal;
 
-    //@Override
     public override string ToString() => value.ToString();
 
-    //@Override
-    public override int GetArity() => 0;
+    public override int Arity => 0;
 }

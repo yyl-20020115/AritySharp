@@ -28,16 +28,10 @@ public class Complex
     public double im;
 
     /** Constructor taking the real and imaginary components. */
-    public Complex(double re = 0.0, double im = 0.0)
-    {
-        Set(re, im);
-    }
+    public Complex(double re = 0.0, double im = 0.0) => Set(re, im);
 
     /** Copy constructor. */
-    public Complex(Complex o)
-    {
-        Set(o);
-    }
+    public Complex(Complex o) => Set(o);
 
     /** Sets the real and imaginary components. */
     public Complex Set(double re, double im)
@@ -56,12 +50,12 @@ public class Complex
     }
 
     /** Formats the real and imaginary part into a string. */
-    public override string ToString() => im == 0 ? "" + re : "(" + re + ", " + im + ')';
+    public override string ToString() => im == 0 ? $"{re}" : $"({re}, {im})";
 
     /**
      * Returns the real part if the imaginary part is zero, otherwise returns NaN.
      */
-    public double AsReal => im == 0 ? re : double.NaN;// return Math.abs(im) < 1E-30 ? re : Double.NaN;
+    public double AsReal => im == 0 ? re : double.NaN;// return Math.abs(im) < 1E-30 ? re : double.NaN;
 
     /**
      * Complex conjugate (negates imaginary).
@@ -608,10 +602,7 @@ public class Complex
     /**
      * Swaps real and imaginary.
      */
-    private Complex Swap()
-    {
-        return Set(im, re);
-    }
+    private Complex Swap() => Set(im, re);
 
     /**
      * Normalizes the finite components of an infinity to zero.
@@ -636,11 +627,6 @@ public class Complex
     private Complex Sqrt1z() => Set(1 - re * re + im * im, -2 * re * im).Sqrt();
 
 
-    public override bool Equals(Object? obj)
-    {
-        if(obj is Complex c) 
-            return this.re == c.re && this.im == c.im;
-        return false;
-    }
+    public override bool Equals(object? obj) => obj is Complex c && re == c.re && this.im == c.im;
     public override int GetHashCode() => this.re.GetHashCode() ^ this.im.GetHashCode();
 }

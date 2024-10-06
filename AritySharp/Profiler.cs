@@ -20,8 +20,9 @@ namespace AritySharp;
  */
 public class Profiler
 {
-    private static readonly string[] PROFILE_CASES = { "(100.5 + 20009.999)*(7+4+3)/(5/2)^3!)*2", "fun1(x)=(x+2)*(x+3)",
-      "otherFun(x)=(fun1(x-1)*x+1)*(fun1(2-x)+10)", "log(x+30.5, 3)^.7*sin(x+.5)" };
+    private static readonly string[] PROFILE_CASES = [
+        "(100.5 + 20009.999)*(7+4+3)/(5/2)^3!)*2", "fun1(x)=(x+2)*(x+3)",
+      "otherFun(x)=(fun1(x-1)*x+1)*(fun1(2-x)+10)", "log(x+30.5, 3)^.7*sin(x+.5)" ];
 
     /**
      * Takes a single command-line argument, an expression; compiles and prints it.
@@ -44,10 +45,10 @@ public class Profiler
             }
             else
             {
-                Symbols symbols = new Symbols();
+                var symbols = new Symbols();
                 for (int i = 1; i < size - 1; ++i)
                 {
-                    FunctionAndName fan = symbols.CompileWithName(argv[i]);
+                    var fan = symbols.CompileWithName(argv[i]);
                     symbols.Define(fan);
                 }
                 Profile(symbols, argv[size - 1]);
@@ -60,7 +61,7 @@ public class Profiler
             {
                 var fan = symbols.CompileWithName(arg);
                 symbols.Define(fan);
-                Function f = fan.function;
+                var f = fan.function;
                 Console.WriteLine(arg + " : " + f);
             }
         }
@@ -68,7 +69,7 @@ public class Profiler
 
     static void Profile(Symbols symbols, string str)
     {
-        Function f = symbols.Compile(str);
+        var f = symbols.Compile(str);
         Console.WriteLine("\n" + str + ": " + f);
 
         long t1 = DateTime.Now.Microsecond;
@@ -79,7 +80,7 @@ public class Profiler
         long t2 = DateTime.Now.Microsecond;
         Console.WriteLine("compilation time: " + (t2 - t1) + " us");
 
-        double[] args = new double[f.GetArity()];
+        double[] args = new double[f.Arity];
         t1 = DateTime.Now.Microsecond;
         for (int i = 0; i < 100000; ++i)
         {
@@ -103,7 +104,7 @@ public class Profiler
         }
         catch (SyntaxException e)
         {
-            throw new Exception("" + e);
+            throw new Exception("", e);
         }
     }
 }

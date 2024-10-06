@@ -30,13 +30,13 @@ public class Compiler
     private readonly Declaration decl;
     public Compiler()
     {
-        exception = new SyntaxException();
-        lexer = new Lexer(exception);
-        rpn = new RPN(exception);
-        declParser = new DeclarationParser(exception);
-        codeGen = new OptCodeGen(exception);
-        simpleCodeGen = new SimpleCodeGen(exception);
-        decl = new Declaration();
+        exception = new ();
+        lexer = new (exception);
+        rpn = new (exception);
+        declParser = new (exception);
+        codeGen = new (exception);
+        simpleCodeGen = new (exception);
+        decl = new ();
 
     }
     public Function CompileSimple(Symbols symbols, string expression)
@@ -91,5 +91,6 @@ public class Compiler
         return fun;
     }
 
-    public FunctionAndName CompileWithName(Symbols symbols, string source) => new (Compile(symbols, source), decl.name);
+    public FunctionAndName CompileWithName(Symbols symbols, string source) 
+        => new (Compile(symbols, source), decl.name);
 }

@@ -77,9 +77,9 @@ public class Lexer(SyntaxException exception)
     public void Scan(string str, TokenConsumer consumer)
     {
         exception.expression = str;
-        if (str.IndexOf(END_MARKER) != -1)
+        if (str.Contains(END_MARKER))
         {
-            throw exception.Set("Invalid character '" + END_MARKER + '\'', str.IndexOf(END_MARKER));
+            throw exception.Set($"Invalid character '{END_MARKER}\'", str.IndexOf(END_MARKER));
         }
         Init(str);
         consumer.Start();
@@ -108,7 +108,7 @@ public class Lexer(SyntaxException exception)
 
     public Token NextToken()
     {
-        while (WHITESPACE.IndexOf(input[pos]) != -1) ++pos;
+        while (WHITESPACE.Contains(input[pos])) ++pos;
 
         char c = input[pos];
         int begin = pos++;
@@ -133,7 +133,7 @@ public class Lexer(SyntaxException exception)
         {
             if (c == '0')
             {
-                char cc = char.ToLower(input[p]);
+                var cc = char.ToLower(input[p]);
                 int _base = (cc == 'x') ? 16 : (cc == 'b') ? 2 : (cc == 'o') ? 8 : 0;
                 if (_base > 0)
                 {
@@ -154,7 +154,7 @@ public class Lexer(SyntaxException exception)
                     }
                     catch (Exception e)
                     {
-                        throw exception.Set("invalid number '" + new string(input, begin, p - 1 - begin) + "'", begin);
+                        throw exception.Set($"invalid number '{new string(input, begin, p - 1 - begin)}'", begin);
                     }
                 }
             }
@@ -164,7 +164,7 @@ public class Lexer(SyntaxException exception)
                 //accept '-' only after E
                 if ((c == 'E' || c == 'e') && (input[p] == '-' || input[p] == UNICODE_MINUS))
                 {
-                    input[p] = '-'; //replace unicode with plain minus, for Double.parseDouble()
+                    input[p] = '-'; //replace unicode with plain minus, for double.parseDouble()
                     ++p;
                 }
                 c = input[p++];
@@ -180,7 +180,7 @@ public class Lexer(SyntaxException exception)
                 }
                 else
                 {
-                    //double numberValue = Double.parseDouble(nbStr);
+                    //double numberValue = double.parseDouble(nbStr);
                     double.TryParse(nbStr, out var numberValue);
                     return TOK_NUMBER.SetValue(numberValue);
                 }
@@ -204,7 +204,7 @@ public class Lexer(SyntaxException exception)
                 c = input[p++];
             }
             var nameValue = new string(input, begin, p - 1 - begin);
-            while (WHITESPACE.IndexOf(c) != -1)
+            while (WHITESPACE.Contains(c))
             {
                 c = input[p++];
             }
