@@ -65,7 +65,7 @@ public class SymbolsTest
     public class MyFun : Function
     {
         Symbols symbols = new();
-        Function f;
+        Function f = Default;
 
         public MyFun()
         {

@@ -2,7 +2,7 @@ namespace AritySharp;
 
 public abstract class ContextFunction : Function
 {
-    private static EvalContext context = new();
+    private static readonly EvalContext context = new();
     private static readonly double[] NO_ARGS = [];
     private static readonly Complex[] NO_ARGS_COMPLEX = [];
 

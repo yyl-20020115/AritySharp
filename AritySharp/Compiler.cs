@@ -30,20 +30,20 @@ public class Compiler
     private readonly Declaration decl;
     public Compiler()
     {
-        exception = new ();
-        lexer = new (exception);
-        rpn = new (exception);
-        declParser = new (exception);
-        codeGen = new (exception);
-        simpleCodeGen = new (exception);
-        decl = new ();
+        this.exception = new();
+        this.lexer = new(exception);
+        this.rpn = new(exception);
+        this.declParser = new(exception);
+        this.codeGen = new(exception);
+        this.simpleCodeGen = new(exception);
+        this.decl = new();
 
     }
     public Function CompileSimple(Symbols symbols, string expression)
     {
-        rpn.SetConsumer(simpleCodeGen.SetSymbols(symbols));
-        lexer.Scan(expression, rpn);
-        return simpleCodeGen.GetFun();
+        this.rpn.SetConsumer(simpleCodeGen.SetSymbols(symbols));
+        this.lexer.Scan(expression, rpn);
+        return this.simpleCodeGen.GetFun();
     }
 
     public Function Compile(Symbols symbols, string source)
@@ -54,27 +54,27 @@ public class Compiler
         {
             try
             {
-                fun = new Constant(CompileSimple(symbols, decl.expression).EvalComplex());
+                fun = new Constant(CompileSimple(symbols, decl.expression??"").EvalComplex());
             }
             catch (SyntaxException e)
             {
-                if (e!=null && e != SimpleCodeGen.HAS_ARGUMENTS)
+                if (e != null && e != SimpleCodeGen.HAS_ARGUMENTS)
                 {
-                    throw e;
+                    throw;
                 }
                 // fall-through (see below)
             }
         }
 
-        if (fun == null)
+        if (fun == null && decl != null)
         {
             // either decl.arity was set, or an HAS_ARGUMENTS exception ocurred above
             symbols.PushFrame();
-            symbols.AddArguments(decl.args);
+            symbols.AddArguments(decl.args ?? []);
             try
             {
                 rpn.SetConsumer(codeGen.SetSymbols(symbols));
-                lexer.Scan(decl.expression, rpn);
+                lexer.Scan(decl.expression ?? "", rpn);
             }
             finally
             {
@@ -87,10 +87,11 @@ public class Compiler
             }
             fun = codeGen.GetFun(arity);
         }
-        fun.comment = source;
-        return fun;
+        if(fun!=null)
+            fun.comment = source;
+        return fun ?? Function.Default;
     }
 
-    public FunctionAndName CompileWithName(Symbols symbols, string source) 
-        => new (Compile(symbols, source), decl.name);
+    public FunctionAndName CompileWithName(Symbols symbols, string source)
+        => new(Compile(symbols, source), decl?.name ?? "");
 }

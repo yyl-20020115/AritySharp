@@ -38,29 +38,24 @@ public class Lexer(SyntaxException exception)
         PERCENT = 17;
 
     public static readonly Token
-        TOK_ADD = new (ADD, 4, Token.LEFT, VM.ADD),
-        TOK_SUB = new (SUB, 4, Token.LEFT, VM.SUB),
+        TOK_ADD = new(ADD, 4, Token.LEFT, VM.ADD),
+        TOK_SUB = new(SUB, 4, Token.LEFT, VM.SUB),
+        TOK_MUL = new(MUL, 5, Token.LEFT, VM.MUL),
+        TOK_DIV = new(DIV, 5, Token.LEFT, VM.DIV),
+        TOK_MOD = new(MOD, 5, Token.LEFT, VM.MOD),
+        TOK_UMIN = new(UMIN, 6, Token.PREFIX, VM.UMIN),
+        TOK_POWER = new(POWER, 7, Token.RIGHT, VM.POWER),
+        TOK_FACT = new(FACT, 8, Token.SUFIX, VM.FACT),
+        TOK_PERCENT = new(PERCENT, 9, Token.SUFIX, VM.PERCENT),
+        TOK_SQRT = new(SQRT, 10, Token.PREFIX, VM.SQRT),
 
-        TOK_MUL = new (MUL, 5, Token.LEFT, VM.MUL),
-        TOK_DIV = new (DIV, 5, Token.LEFT, VM.DIV),
-        TOK_MOD = new (MOD, 5, Token.LEFT, VM.MOD),
+        TOK_LPAREN = new(LPAREN, 1, Token.PREFIX, 0),
+        TOK_RPAREN = new(RPAREN, 3, 0, 0),
+        TOK_COMMA = new(COMMA, 2, 0, 0),
+        TOK_END = new(END, 0, 0, 0),
 
-        TOK_UMIN = new (UMIN, 6, Token.PREFIX, VM.UMIN),
-
-        TOK_POWER = new (POWER, 7, Token.RIGHT, VM.POWER),
-
-        TOK_FACT = new (FACT, 8, Token.SUFIX, VM.FACT),
-        TOK_PERCENT = new (PERCENT, 9, Token.SUFIX, VM.PERCENT),
-
-        TOK_SQRT = new (SQRT, 10, Token.PREFIX, VM.SQRT),
-
-        TOK_LPAREN = new (LPAREN, 1, Token.PREFIX, 0),
-        TOK_RPAREN = new (RPAREN, 3, 0, 0),
-        TOK_COMMA = new (COMMA, 2, 0, 0),
-        TOK_END = new (END, 0, 0, 0),
-
-        TOK_NUMBER = new (NUMBER, 20, 0, 0),
-        TOK_CONST = new (CONST, 20, 0, 0);
+        TOK_NUMBER = new(NUMBER, 20, 0, 0),
+        TOK_CONST = new(CONST, 20, 0, 0);
 
     private const char
         UNICODE_MINUS = '\u2212',
@@ -144,17 +139,17 @@ public class Lexer(SyntaxException exception)
                     } while (('a' <= c && c <= 'z') ||
                              ('A' <= c && c <= 'Z') ||
                              ('0' <= c && c <= '9'));
+                    //0x,0b,0o
                     string coded = new(input, begin + 2, p - 3 - begin);
                     pos = p - 1;
                     try
                     {
                         //Integer.parseInt(coded, _base);
-                        var i = Convert.ToInt16(coded, _base);
-                        return TOK_NUMBER.SetValue(i);
+                        return TOK_NUMBER.SetValue(Convert.ToInt64(coded, _base));
                     }
                     catch (Exception e)
                     {
-                        throw exception.Set($"invalid number '{new string(input, begin, p - 1 - begin)}'", begin);
+                        throw exception.Set($"invalid number '{new string(input, begin, p - 1 - begin)}'", begin, e);
                     }
                 }
             }
@@ -181,13 +176,15 @@ public class Lexer(SyntaxException exception)
                 else
                 {
                     //double numberValue = double.parseDouble(nbStr);
-                    double.TryParse(nbStr, out var numberValue);
-                    return TOK_NUMBER.SetValue(numberValue);
+                    ;
+                    return double.TryParse(nbStr, out var numberValue)
+                       ? TOK_NUMBER.SetValue(numberValue)
+                       : throw new InvalidOperationException();
                 }
             }
             catch (Exception e)
             {
-                throw exception.Set("invalid number '" + nbStr + "'", begin);
+                throw exception.Set($"invalid number '{nbStr}'", begin, e);
             }
         }
         else if (('a' <= c && c <= 'z') ||
@@ -233,7 +230,7 @@ public class Lexer(SyntaxException exception)
                 UNICODE_DIV => TOK_DIV,
                 UNICODE_MINUS => TOK_SUB,
                 UNICODE_SQRT => TOK_SQRT,
-                _ => throw exception.Set("invalid character '" + c + "'", begin),
+                _ => throw exception.Set($"invalid character '{c}'", begin),
             };
         }
     }

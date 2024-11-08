@@ -48,7 +48,6 @@ public class EvalTest
         try
         {
             new Symbols().Eval("1+");
-
         }
         catch (SyntaxException e)
         {

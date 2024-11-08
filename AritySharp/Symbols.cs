@@ -49,11 +49,11 @@ namespace AritySharp;
 public class Symbols
 {
     private readonly static Symbol[] builtin;
-    private static Symbol shell = new (null, 0, false);
+    private static readonly Symbol shell = new ("", 0, false);
     private readonly Compiler compiler = new ();
-    private Dictionary<Symbol, Symbol> symbols = new(); // Hashtable<Symbol, Symbol>
+    private readonly Dictionary<Symbol, Symbol> symbols = []; // Hashtable<Symbol, Symbol>
     private HashSet<Symbol>? delta = null;
-    private Stack<HashSet<Symbol>> frames = new ();
+    private readonly Stack<HashSet<Symbol>> frames = new ();
 
     static Symbols()
     {
@@ -63,7 +63,7 @@ public class Symbols
             vect.Add(Symbol.MakeVmOp(VM.OpcodeName[i], i));
         }
 
-        string[] IMPLICIT_ARGS = { "x", "y", "z" };
+        string[] IMPLICIT_ARGS = ["x", "y", "z"];
         for (byte i = 0; i < IMPLICIT_ARGS.Length; ++i)
         {
             vect.Add(Symbol.MakeArg(IMPLICIT_ARGS[i], i));
@@ -125,10 +125,7 @@ public class Symbols
      *         <p>
      *         These are not definitions: "1+1"; "x+1"
      */
-    public static bool IsDefinition(string source)
-    {
-        return source.IndexOf('=') != -1;
-    }
+    public static bool IsDefinition(string source) => source.Contains('=');
 
     /**
      * Evaluates a simple expression (such as "1+1") and returns its value.
@@ -150,7 +147,6 @@ public class Symbols
     public Complex EvalComplex(string expression)
     {
         lock (this)
-
             return compiler.CompileSimple(this, expression).EvalComplex();
     }
 
@@ -182,7 +178,6 @@ public class Symbols
     public FunctionAndName CompileWithName(string source)
     {
         lock (this)
-
             return compiler.CompileWithName(this, source);
     }
 
@@ -223,9 +218,7 @@ public class Symbols
     {
         lock (this)
             if (funAndName.name != null)
-            {
                 Define(funAndName.name, funAndName.function);
-            }
     }
 
     /**
@@ -258,7 +251,7 @@ public class Symbols
     {
         lock (this)
         {
-            frames.Push(delta);
+            frames.Push(delta ?? []);
             delta = null;
         }
     }
@@ -280,13 +273,9 @@ public class Symbols
                 foreach (Symbol previous in delta)
                 {
                     if (previous.IsEmpty())
-                    {
                         symbols.Remove(previous);
-                    }
                     else
-                    {
                         symbols[previous]= previous;
-                    }
                 }
             }
             delta = frames.Pop();
@@ -297,10 +286,7 @@ public class Symbols
      * Returns all the symbols that were added in the top frame.
      * (i.e. since the most recent pushFrame()).
      */
-    public Symbol[] GetTopFrame()
-    {
-        return delta == null ? [] : [.. delta];
-    }
+    public Symbol[] GetTopFrame() => delta == null ? [] : [.. delta];
 
     /**
      * Return all the defined symbols.
@@ -308,7 +294,7 @@ public class Symbols
     public Symbol[] GetAllSymbols()
     {
         int size = symbols.Count;
-        Symbol[] ret = new Symbol[size];
+        var ret = new Symbol[size];
         symbols.Keys.CopyTo(ret, 0);
         return ret;
     }
@@ -318,37 +304,28 @@ public class Symbols
      */
     public string[] GetDictionary()
     {
-        Symbol[] syms = GetAllSymbols();
+        var syms = GetAllSymbols();
         int size = syms.Length;
-        string[] strings = new string[size];
+        var strings = new string[size];
         for (int i = 0; i < size; ++i)
-        {
             strings[i] = syms[i].Name;
-        }
         return strings;
     }
 
     // --- non-public below
 
-    private static readonly string[] Defines = {
+    private static readonly string[] Defines = [
         "log(x)=ln(x)*0.43429448190325182765", // log10(e)
-      "log10(x)=log(x)", "lg(x)=log(x)",
-
-      "log2(x)=ln(x)*1.4426950408889634074", // log2(e)
-      "lb(x)=log2(x)",
-
-      "log(base,x)=ln(x)/ln(base)", "gamma(x)=(x-1)!",
-
-      "deg=0.017453292519943295", // PI/180
-      "indeg=57.29577951308232", // 180/PI
-
-      "sind(x)=sin(x deg)", "cosd(x)=cos(x deg)", "tand(x)=tan(x deg)",
-
-      "asind(x)=asin(x) indeg", "acosd(x)=acos(x) indeg", "atand(x)=atan(x) indeg",
-
-      "tg(x)=tan(x)", "tgd(x)=tand(x)", "rnd(max)=rnd()*max",
-
-      "re(x)=real(x)", "im(x)=imag(x)", };
+        "log10(x)=log(x)", "lg(x)=log(x)",
+        "log2(x)=ln(x)*1.4426950408889634074", // log2(e)
+        "lb(x)=log2(x)",
+        "log(base,x)=ln(x)/ln(base)", "gamma(x)=(x-1)!",
+        "deg=0.017453292519943295", // PI/180
+        "indeg=57.29577951308232", // 180/PI
+        "sind(x)=sin(x deg)", "cosd(x)=cos(x deg)", "tand(x)=tan(x deg)",
+        "asind(x)=asin(x) indeg", "acosd(x)=acos(x) indeg", "atand(x)=atan(x) indeg",
+        "tg(x)=tan(x)", "tgd(x)=tand(x)", "rnd(max)=rnd()*max",
+        "re(x)=real(x)", "im(x)=imag(x)", ];
 
     public void AddArguments(string[] args)
     {
@@ -368,10 +345,7 @@ public class Symbols
             symbols.Add(previous, previous);
             return;
         }
-        if (delta == null)
-        {
-            delta = [];
-        }
+        delta ??= [];
         if (!delta.Contains(s))
         {
             delta.Add(previous ?? Symbol.NewEmpty(s));

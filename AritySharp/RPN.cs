@@ -22,10 +22,10 @@ namespace AritySharp;
  */
 public class RPN(SyntaxException exception) : TokenConsumer
 {
-    Stack<Token> stack = new();
-    int prevTokenId = 0;
-    TokenConsumer? consumer;
-    SyntaxException exception = exception;
+    private readonly Stack<Token> stack = new();
+    private int prevTokenId = 0;
+    private TokenConsumer consumer = TokenConsumer.Default;
+    private readonly SyntaxException exception = exception;
 
     public void SetConsumer(TokenConsumer consumer) => this.consumer = consumer;
 
@@ -35,24 +35,25 @@ public class RPN(SyntaxException exception) : TokenConsumer
     {
         stack.Clear();
         prevTokenId = 0;
-        consumer?.Start();
+        consumer.Start();
     }
 
-    private Token? Top() => stack.Count == 0 ? null : stack.Peek();
+    private Token Top() => stack.Count == 0 ? Token.Default : stack.Peek();
 
     private void PopHigher(int priority)
     {
-        Token? t = Top();
-        while (t != null && t.priority >= priority)
+        Token t = Top();
+        while (t != Token.Default && t.priority >= priority)
         {
-            consumer?.Push(t);
+            consumer.Push(t);
             // code.push(t);
             stack.Pop();
             t = Top();
         }
     }
 
-    static bool IsOperand(int id) => id == Lexer.FACT || id == Lexer.RPAREN || id == Lexer.NUMBER || id == Lexer.CONST || id == Lexer.PERCENT;
+    static bool IsOperand(int id)
+        => id is Lexer.FACT or Lexer.RPAREN or Lexer.NUMBER or Lexer.CONST or Lexer.PERCENT;
 
     public override void Push(Token token)
     {
@@ -66,7 +67,7 @@ public class RPN(SyntaxException exception) : TokenConsumer
                 {
                     Push(Lexer.TOK_MUL);
                 }
-                consumer?.Push(token);
+                consumer.Push(token);
                 break;
 
             case Lexer.RPAREN:
@@ -81,8 +82,8 @@ public class RPN(SyntaxException exception) : TokenConsumer
                     }
 
                     PopHigher(priority);
-                    Token? t = Top();
-                    if (t != null)
+                    Token t = Top();
+                    if (t != Token.Default)
                     {
                         if (t.id == Lexer.CALL)
                         {
@@ -104,8 +105,8 @@ public class RPN(SyntaxException exception) : TokenConsumer
                         throw exception.Set("misplaced COMMA", token.position);
                     }
                     PopHigher(priority);
-                    Token? t = Top();
-                    if (t == null || t.id != Lexer.CALL)
+                    Token t = Top();
+                    if (t == Token.Default || t.id != Lexer.CALL)
                     {
                         throw exception.Set("COMMA not inside CALL", token.position);
                     }
@@ -121,7 +122,7 @@ public class RPN(SyntaxException exception) : TokenConsumer
                     do
                     {
                         Push(t);
-                    } while (Top() != null);
+                    } while (Top() != Token.Default);
                     break;
                 }
 

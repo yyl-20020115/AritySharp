@@ -20,25 +20,25 @@ public class Symbol
 {
     public static readonly int CONST_ARITY = -3;
 
-    private string? name;
+    private string name;
     private int arity = 0;
 
     public byte op;
-    public Function? fun;
+    public Function function = Function.Default;
     public double valueRe, valueIm;
     public bool isConst = false;
 
     public Symbol(string name, int arity, byte op, bool isConst, int dummy)
     {
-        SetKey(name, arity);
+        SetKey(this.name = name, arity);
         this.op = op;
         this.isConst = isConst;
     }
 
-    public Symbol(string name, Function fun)
+    public Symbol(string name, Function function)
     {
-        SetKey(name, fun.Arity);
-        this.fun = fun;
+        SetKey(this.name = name, function.Arity);
+        this.function = function;
         // this.comment = fun.comment;
     }
 
@@ -49,7 +49,7 @@ public class Symbol
 
     public Symbol(string name, double re, double im, bool isConst)
     {
-        SetKey(name, CONST_ARITY);
+        SetKey(this.name = name, CONST_ARITY);
         valueRe = re;
         valueIm = im;
         this.isConst = isConst;
@@ -61,7 +61,7 @@ public class Symbol
 
     public override string ToString() => $"Symbol '{name}' arity {arity} val {valueRe} op {op}";
 
-    public string Name => name;
+    public string Name => name ?? "";
 
     /*
     public string GetComment() {
@@ -71,9 +71,12 @@ public class Symbol
 
     public int GetArity() => arity == CONST_ARITY ? 0 : arity;
 
-    public static Symbol NewEmpty(Symbol s) => new Symbol(s.name, s.arity, (byte)0, false, 0);
+    public static Symbol NewEmpty(Symbol s) => new(s.name ?? "", s.arity, (byte)0, false, 0);
 
-    public bool IsEmpty() => op == 0 && fun == null && valueRe == 0 && valueIm == 0;
+    public bool IsEmpty() => op == 0 
+        && function == Function.Default 
+        && valueRe == 0 
+        && valueIm == 0;
 
     public Symbol SetKey(string name, int arity)
     {

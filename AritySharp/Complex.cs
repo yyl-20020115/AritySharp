@@ -28,10 +28,12 @@ public class Complex
     public double im;
 
     /** Constructor taking the real and imaginary components. */
-    public Complex(double re = 0.0, double im = 0.0) => Set(re, im);
+    public Complex(double re = 0.0, double im = 0.0)
+        => Set(re, im);
 
     /** Copy constructor. */
-    public Complex(Complex o) => Set(o);
+    public Complex(Complex o)
+        => Set(o);
 
     /** Sets the real and imaginary components. */
     public Complex Set(double re, double im)
@@ -83,7 +85,10 @@ public class Complex
      */
     public bool IsNaN => double.IsNaN(re) || double.IsNaN(im);
 
-    public bool Equals(Complex o) => ((re == o.re) || (re != re && o.re != o.re)) && ((im == o.im) || (im != im && o.im != o.im));
+    //public bool Equals(Complex o) 
+    //    => ((this.re == o.re) 
+    //    || (double.IsNaN(this.re) && double.IsNaN(o.re))) && ((this.im == o.im) 
+    //    || (double.IsNaN(this.im) && double.IsNaN(o.im)));
 
     /**
      * The argument (angle) in polar coordinates.
@@ -95,14 +100,11 @@ public class Complex
      */
     public double Abs()
     {
-        double a = Math.Abs(re);
-        double b = Math.Abs(im);
-        if (a == 0 || b == 0)
-        {
-            return a + b;
-        }
-        bool aGreater = a > b;
-        double q = aGreater ? b / a : a / b;
+        var a = Math.Abs(re);
+        var b = Math.Abs(im);
+        if (a == 0 || b == 0) return a + b;
+        var aGreater = a > b;
+        var q = aGreater ? b / a : a / b;
         return (aGreater ? a : b) * Math.Sqrt(1 + q * q);
     }
 
@@ -118,14 +120,12 @@ public class Complex
      */
     public Complex Add(Complex o)
     {
-        double ulp = Util.MathUlp(re);
-        re += o.re;
-        im += o.im;
+        var ulp = Util.MathUlp(re);
+        this.re += o.re;
+        this.im += o.im;
         // hack for "1.1-1-.1"
         if (Math.Abs(re) < ulp * 1024)
-        {
-            re = 0;
-        }
+            this.re = 0;
         return this;
     }
 
@@ -134,21 +134,19 @@ public class Complex
      */
     public Complex Sub(Complex o)
     {
-        double ulp = Util.MathUlp(re);
-        re -= o.re;
-        im -= o.im;
+        var ulp = Util.MathUlp(re);
+        this.re -= o.re;
+        this.im -= o.im;
         // hack for "1.1-1-.1"
         if (Math.Abs(re) < ulp * 1024)
-        {
-            re = 0;
-        }
+            this.re = 0;
         return this;
     }
 
     public Complex Mul(double o)
     {
-        re *= o;
-        im *= o;
+        this.re *= o;
+        this.im *= o;
         return this;
     }
 
@@ -157,14 +155,12 @@ public class Complex
      */
     public Complex Mul(Complex o)
     {
-        double a = re, b = im, c = o.re, d = o.im;
+        double a = this.re, b = this.im, c = o.re, d = o.im;
         if (b == 0 && d == 0)
-        {
             return Set(a * c, 0);
-        }
 
-        double mre = a * c - b * d;
-        double mim = a * d + b * c;
+        var mre = a * c - b * d;
+        var mim = a * d + b * c;
 
         if (!Set(mre, mim).IsNaN)
         {
@@ -389,8 +385,9 @@ public class Complex
             }
             if (im == 0)
             {
-                double res = Math.Pow(re, y.re);
-                if (res == res)
+                var res = Math.Pow(re, y.re);
+                //if (res == res)
+                if(!double.IsNaN(res))
                 { // !NaN
                     return Set(res, 0);
                 }
@@ -420,161 +417,147 @@ public class Complex
      */
     public Complex Lgamma()
     {
-        double sumRe = 0.99999999999999709182, sumIm = 0;
-        double down = re * re + im * im;
-        double xplusk = re;
-        double[] GAMMA = MoreMath.GAMMA;
+        var sumRe = 0.99999999999999709182;
+        var sumIm = 0.0;
+        var down = re * re + im * im;
+        var xplusk = re;
+        var GAMMA = MoreMath.GAMMA;
         for (int k = 0; k < GAMMA.Length; ++k)
         {
             ++xplusk;
             down += xplusk + xplusk - 1;
-            double cc = GAMMA[k];
+            var cc = GAMMA[k];
             sumRe += cc * xplusk / down;
             sumIm -= cc * im / down;
         }
 
-        double a = re + .5;
-        double tmpRe = re + 5.2421875;
-        double saveIm = im;
+        var a = re + 0.5;
+        var tmpRe = re + 5.2421875;
+        var saveIm = im;
 
-        re = tmpRe;
+        this.re = tmpRe;
 
         Log();
         double termRe = a * re - saveIm * im + 0.9189385332046727418 - tmpRe;
         double termIm = a * im + saveIm * re - saveIm;
 
         Set(sumRe, sumIm).Log();
-        re += termRe;
-        im += termIm;
+        this.re += termRe;
+        this.im += termIm;
         return this;
     }
 
     /**
      * Complex factorial, based on lgamma().
      */
-    public Complex Factorial() => im == 0 ? Set(MoreMath.Factorial(re), 0) : Lgamma().Exp();
+    public Complex Factorial() => this.im == 0 ? Set(MoreMath.Factorial(this.re), 0) : Lgamma().Exp();
 
     /** sin(a+ib) = sin(a)*cosh(b) + i*cos(a)*sinh(b). */
-    public Complex Sin() => im == 0 ? Set(MoreMath.Sin(re), 0) : Set(MoreMath.Sin(re) * Math.Cosh(im), MoreMath.Cos(re) * Math.Sinh(im));
+    public Complex Sin() => this.im == 0 ? Set(MoreMath.Sin(this.re), 0) : Set(MoreMath.Sin(this.re) * Math.Cosh(this.im), MoreMath.Cos(re) * Math.Sinh(this.im));
 
     /** sinh(a+ib) = sinh(a)*cos(b) + i*cosh(a)*sin(b). */
-    public Complex Sinh() => im == 0 ? Set(Math.Sinh(re), 0) : Swap().Sin().Swap();
+    public Complex Sinh() => this.im == 0 ? Set(Math.Sinh(this.re), 0) : Swap().Sin().Swap();
 
     /** cos(a+ib) = cos(a)cosh(b) - i*sin(a)sinh(b). */
-    public Complex Cos() => im == 0 ? Set(MoreMath.Cos(re), 0)
-            : Set(MoreMath.Cos(re) * Math.Cosh(im), -MoreMath.Sin(re) * Math.Sinh(im));
+    public Complex Cos() => this.im == 0 ? Set(MoreMath.Cos(this.re), 0)
+            : Set(MoreMath.Cos(this.re) * Math.Cosh(im), -MoreMath.Sin(this.re) * Math.Sinh(this.im));
 
     /** cosh(a+ib) = cosh(a)cos(b) + i*sinh(a)sin(b). */
-    public Complex Cosh() => im == 0 ? Set(Math.Cosh(re), 0) : Swap().Cos().Conjugate();
+    public Complex Cosh() => this.im == 0 ? Set(Math.Cosh(this.re), 0) : Swap().Cos().Conjugate();
 
     /** tan(a+ib) = sin(2a)/(cos(2a)+cosh(2b) + i*sinh(2b)/(cos(2a)+cosh(2b)). */
     public Complex Tan()
     {
-        if (im == 0)
-        {
-            return Set(MoreMath.Tan(re), 0);
-        }
-        double aa = re + re;
-        double bb = im + im;
-        double down = MoreMath.Cos(aa) + Math.Cosh(bb);
+        if (this.im == 0)
+            return Set(MoreMath.Tan(this.re), 0);
+        var aa = this.re + this.re;
+        var bb = this.im + this.im;
+        var down = MoreMath.Cos(aa) + Math.Cosh(bb);
         return Set(MoreMath.Sin(aa) / down, Math.Sinh(bb) / down);
     }
 
     /** tanh(a+ib) = sinh(2a)/(cosh(2a) + cos(2b)) + i*sin(2b)/(cosh(2a)+cos(2b)). */
-    public Complex Tanh() => im == 0 ? Set(Math.Tanh(re), 0) : Swap().Tan().Swap();
+    public Complex Tanh() 
+        => this.im == 0 ? Set(Math.Tanh(this.re), 0) : Swap().Tan().Swap();
 
     /** asin(x) = -i*log(sqrt(1-x^2)+ix). */
     public Complex Asin()
     {
-        if (im == 0 && Math.Abs(re) <= 1)
-        {
-            return Set(Math.Asin(re), 0);
-        }
-        double saveA = re;
-        double saveB = im;
-        return Sqrt1z().Set(re - saveB, im + saveA).Log().Set(im, -re);
+        if (im == 0 && Math.Abs(this.re) <= 1)
+            return Set(Math.Asin(this.re), 0);
+        var saveA = this.re;
+        var saveB = this.im;
+        return Sqrt1z().Set(this.re - saveB, this.im + saveA).Log().Set(this.im, -this.re);
     }
 
     /** acos(x) = -i*log(x + i*sqrt(1-x^2)). */
     public Complex Acos()
     {
-        if (im == 0 && Math.Abs(re) <= 1)
-        {
-            return Set(Math.Acos(re), 0);
-        }
-        double saveA = re;
-        double saveB = im;
-        return Sqrt1z().Set(saveA - im, saveB + re).Log().Set(im, -re);
+        if (im == 0 && Math.Abs(this.re) <= 1)
+            return Set(Math.Acos(this.re), 0);
+        var saveA = this.re;
+        var saveB = this.im;
+        return Sqrt1z().Set(saveA - this.im, saveB + this.re).Log().Set(this.im, -this.re);
     }
 
     /** atan(x) = i/2 * log((i+x)/(i-x)). */
     public Complex Atan()
     {
-        if (im == 0)
-        {
-            return Set(Math.Atan(re), 0);
-        }
-        double a2 = re * re;
-        double b2 = im * im;
-        double down = a2 + b2 - im - im + 1;
-        return Set(-(a2 + b2 - 1) / down, -(re + re) / down).Log().Set(-im / 2, re / 2);
+        if (this.im == 0)
+            return Set(Math.Atan(this.re), 0);
+        var a2 = this.re * this.re;
+        var b2 = this.im * this.im;
+        var down = a2 + b2 - this.im - this.im + 1;
+        return Set(-(a2 + b2 - 1) / down, -(this.re + this.re) / down).Log().Set(-this.im / 2, this.re / 2);
     }
 
     /** asinh(x) = log(x+sqrt(x^2+1)). */
     public Complex Asinh()
     {
-        if (im == 0)
-        {
-            return Set(MoreMath.Asinh(re), 0);
-        }
-        double a = re;
-        double b = im;
-        return Set(re * re - im * im + 1, 2 * re * im).Sqrt().Set(re + a, im + b).Log();
+        if (this.im == 0)
+            return Set(MoreMath.Asinh(this.re), 0);
+        var a = this.re;
+        var b = this.im;
+        return Set(this.re * this.re - this.im * this.im + 1.0, 2.0 * this.re * this.im).Sqrt().Set(this.re + a, this.im + b).Log();
     }
 
     /** acosh(x) = log(x+sqrt(x^2-1)). */
     public Complex Acosh()
     {
-        if (im == 0 && re >= 1)
-        {
-            return Set(MoreMath.Acosh(re), 0);
-        }
-        double a = re;
-        double b = im;
-        return Set(re * re - im * im - 1, 2 * re * im).Sqrt().Set(re + a, im + b).Log();
+        if (this.im == 0 && this.re >= 1)
+            return Set(MoreMath.Acosh(this.re), 0);
+        var a = this.re;
+        var b = this.im;
+        return Set(this.re * this.re - this.im * this.im - 1.0, 2.0 * this.re * this.im).Sqrt().Set(this.re + a, this.im + b).Log();
     }
 
     /** atanh(x) = log((1+x)/(1-x))/2. */
     public Complex Atanh()
     {
-        if (im == 0)
-        {
-            return Set(MoreMath.Atanh(re), 0);
-        }
-        double a2 = re * re;
-        double b2 = im * im;
-        double down = a2 + 1 - re - re;
-        return Set((1 - a2 - b2) / down, (im + im) / down).Log().Set(re / 2, im / 2);
+        if (this.im == 0)
+            return Set(MoreMath.Atanh(this.re), 0);
+        var a2 = this.re * this.re;
+        var b2 = this.im * this.im;
+        var down = a2 + 1.0 - this.re - this.re;
+        return Set((1 - a2 - b2) / down, (this.im + this.im) / down).Log().Set(this.re / 2.0, this.im / 2.0);
     }
 
     /** Combinations: C(n, k) == exp(lgamma(n) - lgamma(k) - lgamma(n-k)). */
     public Complex Combinations(Complex o)
     {
-        if (im == 0 && o.im == 0)
-        {
+        if (this.im == 0 && o.im == 0)
             return Set(MoreMath.Combinations(re, o.re), 0);
-        }
 
-        double a = re;
-        double b = im;
+        var a = this.re;
+        var b = this.im;
 
         Lgamma();
-        double c = re;
-        double d = im;
+        var c = this.re;
+        var d = this.im;
 
         Set(o).Lgamma();
-        double e = re;
-        double f = im;
+        var e = this.re;
+        var f = this.im;
 
         Set(a - o.re, b - o.im).Lgamma();
         return Set(c - e - re, d - f - im).Exp();
@@ -583,17 +566,15 @@ public class Complex
     /** Permutations: P(n, k) == exp(lgamma(n) - lgamma(n-k)). */
     public Complex Permutations(Complex o)
     {
-        if (im == 0 && o.im == 0)
-        {
-            return Set(MoreMath.Permutations(re, o.re), 0);
-        }
+        if (this.im == 0 && o.im == 0)
+            return Set(MoreMath.Permutations(this.re, o.re), 0);
 
-        double a = re;
-        double b = im;
+        var a = this.re;
+        var b = this.im;
 
         Lgamma();
-        double c = re;
-        double d = im;
+        var c = this.re;
+        var d = this.im;
 
         Set(a - o.re, b - o.im).Lgamma();
         return Set(c - re, d - im).Exp();
@@ -602,7 +583,7 @@ public class Complex
     /**
      * Swaps real and imaginary.
      */
-    private Complex Swap() => Set(im, re);
+    private Complex Swap() => this.Set(im, re);
 
     /**
      * Normalizes the finite components of an infinity to zero.
@@ -612,20 +593,20 @@ public class Complex
     private Complex NormalizeInfinity()
     {
         // assumes this.isInfinite()
-        if (!double.IsInfinity(im))
+        if (!double.IsInfinity(this.im))
         {
-            im = 0;
+            this.im = 0;
         }
-        else if (!double.IsInfinity(re))
+        else if (!double.IsInfinity(this.re))
         {
-            re = 0;
-        } 
+            this.re = 0;
+        }
         return this;
     }
 
     /** sqrt(1-x^2) */
-    private Complex Sqrt1z() => Set(1 - re * re + im * im, -2 * re * im).Sqrt();
-
+    private Complex Sqrt1z()
+        => Set(1.0 - this.re * this.re + this.im * this.im, -2.0 * this.re * this.im).Sqrt();
 
     public override bool Equals(object? obj) => obj is Complex c && re == c.re && this.im == c.im;
     public override int GetHashCode() => this.re.GetHashCode() ^ this.im.GetHashCode();

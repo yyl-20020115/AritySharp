@@ -18,6 +18,7 @@ namespace AritySharp;
 
 public class ByteStack
 {
+    public const byte Zero = 0;
     private byte[] data = new byte[8];
     private int size = 0;
 
@@ -34,13 +35,7 @@ public class ByteStack
         this.data[this.size++] = b;
     }
 
-    /*
-    void pop(int cnt) {
-        size -= cnt;
-    }
-    */
-
-    public byte Pop() => this.data[--this.size];
+    public byte Pop() => this.size > 0 ? this.data[--this.size] : Zero;
 
     public byte[] ToArray()
     {

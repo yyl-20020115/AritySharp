@@ -35,12 +35,15 @@ public class SyntaxException : Exception
      */
     public int position;
 
+    public Exception? Cause = null;
+
     ////@Override\\
     public override string ToString() => $"SyntaxException: {message} in '{expression}' at position {position}";
 
-    public SyntaxException Set(string str, int pos)
+    public SyntaxException Set(string message, int pos,Exception? cause = null)
     {
-        message = str;
+        this.Cause = cause;
+        this.message = message;
         position = pos;
         //fillInStackTrace();
         return this;

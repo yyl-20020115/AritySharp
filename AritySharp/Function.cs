@@ -28,6 +28,12 @@ namespace AritySharp;
  */
 public abstract class Function
 {
+    public class EmptyFunction : Function
+    {
+        public override int Arity => 0;
+    }
+    public static readonly Function Default = new EmptyFunction();
+
     private Function? cachedDerivate;
     public string? comment;
 

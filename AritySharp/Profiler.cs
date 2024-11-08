@@ -22,7 +22,8 @@ public class Profiler
 {
     private static readonly string[] PROFILE_CASES = [
         "(100.5 + 20009.999)*(7+4+3)/(5/2)^3!)*2", "fun1(x)=(x+2)*(x+3)",
-      "otherFun(x)=(fun1(x-1)*x+1)*(fun1(2-x)+10)", "log(x+30.5, 3)^.7*sin(x+.5)" ];
+        "otherFun(x)=(fun1(x-1)*x+1)*(fun1(2-x)+10)", "log(x+30.5, 3)^.7*sin(x+.5)" 
+        ];
 
     /**
      * Takes a single command-line argument, an expression; compiles and prints it.
@@ -62,7 +63,7 @@ public class Profiler
                 var fan = symbols.CompileWithName(arg);
                 symbols.Define(fan);
                 var f = fan.function;
-                Console.WriteLine(arg + " : " + f);
+                Console.WriteLine($"{arg} : {f}");
             }
         }
     }
@@ -70,17 +71,17 @@ public class Profiler
     static void Profile(Symbols symbols, string str)
     {
         var f = symbols.Compile(str);
-        Console.WriteLine("\n" + str + ": " + f);
+        Console.WriteLine($"\n{str}: {f}");
 
-        long t1 = DateTime.Now.Microsecond;
+        var t1 = DateTime.Now.Microsecond;
         for (int i = 0; i < 1000; ++i)
         {
             symbols.Compile(str);
         }
-        long t2 = DateTime.Now.Microsecond;
-        Console.WriteLine("compilation time: " + (t2 - t1) + " us");
+        var t2 = DateTime.Now.Microsecond;
+        Console.WriteLine($"compilation time: {t2 - t1} us");
 
-        double[] args = new double[f.Arity];
+        var args = new double[f.Arity];
         t1 = DateTime.Now.Microsecond;
         for (int i = 0; i < 100000; ++i)
         {
@@ -96,15 +97,15 @@ public class Profiler
         var symbols = new Symbols();
         try
         {
-            foreach (string cas in PROFILE_CASES)
+            foreach (var cas in PROFILE_CASES)
             {
                 symbols.Define(symbols.CompileWithName(cas));
                 Profile(symbols, cas);
             }
         }
-        catch (SyntaxException e)
+        catch (SyntaxException)
         {
-            throw new Exception("", e);
+            throw;
         }
     }
 }

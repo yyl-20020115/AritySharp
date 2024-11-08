@@ -20,5 +20,5 @@ namespace AritySharp;
 
 public class ArityException(string mes) : Exception(mes)
 {
-    public ArityException(int nArgs) : this("Didn't expect " + nArgs + " arguments") { }
+    public ArityException(int nArgs) : this($"Didn't expect {nArgs} arguments") { }
 }

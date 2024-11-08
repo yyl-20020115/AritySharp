@@ -56,7 +56,7 @@ public class DeclarationParser(SyntaxException e) : TokenConsumer
                 }
                 else if (arity >= 0)
                 {
-                    args.Add(token.name);
+                    args.Add(token.name??"");
                     ++arity;
                     if (arity > MAX_ARITY)
                     {

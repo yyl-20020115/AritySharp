@@ -44,8 +44,8 @@ public class DoubleStack
     public void Pop(int cnt)
     {
         if (cnt > size)
-            throw new Exception("pop " + cnt + " from " + size);
-        size -= cnt;
+            throw new Exception($"pop {cnt} from {size}");
+        this.size -= cnt;
     }
 
     public void Pop() => --size;
@@ -57,7 +57,7 @@ public class DoubleStack
         return trimmed;
     }
 
-    public double[]? GetIm()
+    public double[] GetIm()
     {
         var allZero = true;
         for (int i = 0; i < size; ++i)

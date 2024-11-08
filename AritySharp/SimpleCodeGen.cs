@@ -50,7 +50,7 @@ public class SimpleCodeGen(SyntaxException exception) : TokenConsumer
 
     public Symbol GetSymbol(Token token)
     {
-        var name = token.name;
+        var name = token.name??"";
         bool isDerivative = token.IsDerivative();
         if (isDerivative)
         {
@@ -64,13 +64,13 @@ public class SimpleCodeGen(SyntaxException exception) : TokenConsumer
             }
         }
         var symbol = symbols?.Lookup(name, token.arity) ?? throw exception.Set($"undefined '{name}' with arity {token.arity}", token.position);
-        if (isDerivative && symbol.op > 0 && symbol.fun == null)
+        if (isDerivative && symbol.op > 0 && symbol.function == Function.Default)
         {
-            symbol.fun = CompiledFunction.MakeOpFunction(symbol.op);
+            symbol.function = CompiledFunction.MakeOpFunction(symbol.op);
         }
-        if (isDerivative && symbol.fun == null)
+        if (isDerivative && symbol.function == Function.Default)
         {
-            throw exception.Set("Invalid derivative " + name, token.position);
+            throw exception.Set($"Invalid derivative {name}", token.position);
         }
         return symbol;
     }
@@ -91,7 +91,7 @@ public class SimpleCodeGen(SyntaxException exception) : TokenConsumer
                 if (token.IsDerivative())
                 {
                     op = VM.CALL;
-                    funcs.Push(symbol.fun.Derivative);
+                    funcs.Push(symbol.function.Derivative);
                 }
                 else if (symbol.op > 0)
                 { // built-in
@@ -101,10 +101,10 @@ public class SimpleCodeGen(SyntaxException exception) : TokenConsumer
                         throw HAS_ARGUMENTS.Set("eval() on implicit function", exception.position);
                     }
                 }
-                else if (symbol.fun != null)
+                else if (symbol.function != Function.Default)
                 { // function call
                     op = VM.CALL;
-                    funcs.Push(symbol.fun);
+                    funcs.Push(symbol.function);
                 }
                 else
                 { // variable reference
@@ -117,7 +117,7 @@ public class SimpleCodeGen(SyntaxException exception) : TokenConsumer
                 op = token.vmop;
                 if (op <= 0)
                 {
-                    throw new Exception("wrong vmop: " + op + ", id " + token.id + " in \"" + exception.expression + '"');
+                    throw new Exception($"wrong vmop: {op}, id {token.id} in \"{exception.expression}\"");
                 }
                 break;
         }

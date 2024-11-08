@@ -65,7 +65,7 @@ public static class Util
                 //assert exp <= double.MAX_EXPONENT && exp >= double.MIN_EXPONENT;
 
                 // ulp(x) is usually 2^(SIGNIFICAND_WIDTH-1)*(2^ilogb(x))
-                exp = exp - (SIGNIFICAND_WIDTH - 1);
+                exp -= (SIGNIFICAND_WIDTH - 1);
                 if (exp >= MIN_EXPONENT)
                 {
                     return PowerOfTwoD(exp);
@@ -156,7 +156,7 @@ public static class Util
         int roundingStart = (roundingDigits <= 0 || roundingDigits > 13) ? 17 : (16 - roundingDigits);
 
         int ePos = str.LastIndexOf('E');
-        int exp = (ePos != -1) ? (int.TryParse(str.Substring(ePos + 1),out var t)?t:0) : 0;
+        int exp = (ePos != -1) ? (int.TryParse(str.AsSpan(ePos + 1),out var t)?t:0) : 0;
         if (ePos != -1)
         {
             buf.Length = (ePos);
@@ -308,10 +308,7 @@ public static class Util
         if (maxLen != LEN_UNLIMITED)
         {
             --maxLen; // for readonly "i"
-            if (addPlus)
-            {
-                --maxLen;
-            }
+            if (addPlus) --maxLen;
             maxLen -= finalMultiply.Length;
 
             int sreLen = sre.Length;
@@ -342,6 +339,6 @@ public static class Util
                 sim = SizeTruncate(sim, simTarget);
             }
         }
-        return sre + (addPlus ? "+" : "") + sim + finalMultiply + 'i';
+        return $"{sre}{(addPlus ? "+" : "")}{sim}{finalMultiply}i";
     }
 }

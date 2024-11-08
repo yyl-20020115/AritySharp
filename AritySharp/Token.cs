@@ -15,6 +15,8 @@ namespace AritySharp;
 
 public class Token(int id, int priority, int assoc, int vmop)
 {
+    public static readonly Token Default = new(-1, -1, -1, -1);
+
     // kind
     public const int PREFIX = 1, LEFT = 2, RIGHT = 3, SUFIX = 4;
 
@@ -46,13 +48,13 @@ public class Token(int id, int priority, int assoc, int vmop)
         return this;
     }
 
-    public bool IsDerivative() => name != null && (name.Length) > 0 && name[(name.Length - 1)] == '\'';
+    public bool IsDerivative() => name != null && (name.Length) > 0 && name[^1] == '\'';
 
     public override string ToString() => id switch
     {
-        Lexer.NUMBER => "" + value,
-        Lexer.CALL => name + '(' + arity + ')',
-        Lexer.CONST => name,
-        _ => "" + id,
-    }??"";
+        Lexer.NUMBER => $"{value}",
+        Lexer.CALL => $"{name}({arity})",
+        Lexer.CONST => name??"",
+        _ => $"{id}",
+    };
 }

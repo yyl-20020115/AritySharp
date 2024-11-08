@@ -27,8 +27,6 @@ public class Declaration
     public void Parse(string source, Lexer lexer, DeclarationParser declParser)
     {
         int equalPos = source.IndexOf('=');
-        string? decl = null;
-
         if (equalPos == -1)
         {
             expression = source;
@@ -38,7 +36,7 @@ public class Declaration
         }
         else
         {
-            decl = source[..equalPos];
+            var decl = source[..equalPos];
             expression = source[(equalPos + 1)..];
             lexer.Scan(decl, declParser);
             name = declParser.name;

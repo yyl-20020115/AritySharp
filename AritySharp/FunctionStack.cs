@@ -34,13 +34,7 @@ public class FunctionStack
         data[size++] = b;
     }
 
-    /*
-    void pop(int cnt) {
-        size -= cnt;
-    }
-    */
-
-    public Function Pop() => data[--size];
+    public Function Pop() => this.size>0 ? this.data[--this.size]: Function.Default;
 
     public Function[] ToArray()
     {

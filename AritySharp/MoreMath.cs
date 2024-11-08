@@ -21,26 +21,28 @@ public class MoreMath
 {
     private static readonly double LOG2E = 1.4426950408889634074;
 
-    public static double Asinh(double x) => (x < 0) ? -Asinh(-x) : Math.Log(x + x + 1 / (Math.Sqrt(x * x + 1) + x));
+    public static double Asinh(double x)
+        => (x < 0) ? -Asinh(-x) : Math.Log(x + x + 1 / (Math.Sqrt(x * x + 1) + x));
 
-    public static double Acosh(double x) => Math.Log(x + x - 1 / (Math.Sqrt(x * x - 1) + x));
+    public static double Acosh(double x)
+        => Math.Log(x + x - 1 / (Math.Sqrt(x * x - 1) + x));
 
-    public static double Atanh(double x) => (x < 0) ? -Atanh(-x) : 0.5 * Math.Log(1.0 + (x + x) / (1 - x));
+    public static double Atanh(double x)
+        => (x < 0) ? -Atanh(-x) : 0.5 * Math.Log(1.0 + (x + x) / (1 - x));
 
-    public static double Trunc(double x) => x >= 0 ? Math.Floor(x) : Math.Ceiling(x);
+    public static double Trunc(double x)
+        => x >= 0 ? Math.Floor(x) : Math.Ceiling(x);
 
     public static double Gcd(double x, double y)
     {
         if (double.IsNaN(x) || double.IsNaN(y) ||
             double.IsInfinity(x) || double.IsInfinity(y))
-        {
             return double.NaN;
-        }
         x = Math.Abs(x);
         y = Math.Abs(y);
         while (x < y * 1e15)
         {
-            double save = y;
+            var save = y;
             y = x % y;
             x = save;
         }
@@ -66,12 +68,10 @@ public class MoreMath
 
     public static double Lgamma(double x)
     {
-        double tmp = x + 5.2421875; //== 607/128. + .5;
-        double sum = 0.99999999999999709182;
+        var tmp = x + 5.2421875; //== 607/128. + .5;
+        var sum = 0.99999999999999709182;
         for (int i = 0; i < GAMMA.Length; ++i)
-        {
             sum += GAMMA[i] / ++x;
-        }
 
         return 0.9189385332046727418 //LN_SQRT2PI, ln(sqrt(2*pi))
             + Math.Log(sum)
@@ -79,7 +79,7 @@ public class MoreMath
             ;
     }
 
-    static readonly double[] FACT = {
+    static readonly double[] FACT = [
         1.0,
         40320.0,
         2.0922789888E13,
@@ -102,7 +102,7 @@ public class MoreMath
         1.3113358856834524E267,
         4.7147236359920616E284,
         2.5260757449731984E302,
-    };
+    ];
 
     public static double Factorial(double x)
     {
@@ -115,7 +115,7 @@ public class MoreMath
             if (Math.Floor(x) == x)
             {
                 int n = (int)x;
-                double extra = x;
+                var extra = x;
                 switch (n & 7)
                 {
                     case 7:
@@ -148,8 +148,8 @@ public class MoreMath
 
     public static double Combinations(double n, double k)
     {
-        if (n < 0 || k < 0) { return double.NaN; }
-        if (n < k) { return 0; }
+        if (n < 0 || k < 0) return double.NaN;
+        if (n < k) return 0;
         if (Math.Floor(n) == n && Math.Floor(k) == k)
         {
             k = Math.Min(k, n - k);
@@ -175,8 +175,8 @@ public class MoreMath
 
     public static double Permutations(double n, double k)
     {
-        if (n < 0 || k < 0) { return double.NaN; }
-        if (n < k) { return 0; }
+        if (n < 0 || k < 0) return double.NaN;
+        if (n < k) return 0;
         if (Math.Floor(n) == n && Math.Floor(k) == k)
         {
             if (n <= 170 && 10 < k && k <= 170)
@@ -204,7 +204,7 @@ public class MoreMath
     private static bool IsPiMultiple(double x)
     {
         // x % y == 0
-        double d = x / Math.PI;
+        var d = x / Math.PI;
         return d == Math.Floor(d);
     }
 
@@ -216,10 +216,10 @@ public class MoreMath
 
     public static int IntLog10(double x)
     {
-        double d = Math.Log10(x);
+        var d = Math.Log10(x);
         //an alternative implem is using a for loop.
-        double f = Math.Floor(d);//return (int)log10(x);
-        return double.IsNaN(f)?0: (int)f;
+        var f = Math.Floor(d);//return (int)log10(x);
+        return double.IsNaN(f) ? 0 : (int)f;
     }
-    public static double IntExp10(int exp) => double.TryParse("1E" + exp, out var v) ? v : double.NaN;
+    public static double IntExp10(int exp) => double.TryParse($"1E{exp}", out var v) ? v : double.NaN;
 }

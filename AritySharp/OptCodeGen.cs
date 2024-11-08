@@ -62,13 +62,12 @@ public class OptCodeGen  :  SimpleCodeGen {
             traceConstsRe[0] = token.value;
             traceConstsIm[0] = 0;
             break;
-            
         case Lexer.CONST:
         case Lexer.CALL:
             Symbol symbol = GetSymbol(token);
             if (token.IsDerivative()) {
                 op = VM.CALL;
-                traceFuncs[0] = symbol.fun.Derivative;
+                traceFuncs[0] = symbol.function.Derivative;
             } else if (symbol.op > 0) { // built-in
                 op = symbol.op;
                 if (op >= VM.LOAD0 && op <= VM.LOAD4) {
@@ -82,9 +81,9 @@ public class OptCodeGen  :  SimpleCodeGen {
                     //System.out.println("op " + VM.opcodeName[op] + "; sp " + sp + "; top " + stack[sp]);
                     return;
                 }
-            } else if (symbol.fun != null) { // function call
+            } else if (symbol.function != Function.Default) { // function call
                 op = VM.CALL;
-                traceFuncs[0] = symbol.fun;
+                traceFuncs[0] = symbol.function;
             } else { // variable reference
                 op = VM.CONST;
                 traceConstsRe[0] = symbol.valueRe;
@@ -102,7 +101,7 @@ public class OptCodeGen  :  SimpleCodeGen {
             }
                 break;
         }
-        int oldSP = sp;
+        //int oldSP = sp;
         traceCode[0] = op;
         if (op != VM.RND) {
             sp = tracer.ExecWithoutCheckComplex(context, sp, prevWasPercent ? -1 : -2);
@@ -110,9 +109,6 @@ public class OptCodeGen  :  SimpleCodeGen {
             stack[++sp].re = double.NaN;
             stack[sp].im = 0;
         }
-
-        //System.out.println("op " + VM.opcodeName[op] + "; old " + oldSP + "; sp " + sp + "; top " + stack[sp] + " " + stack[0]);
-            
         //constant folding
         if (!stack[sp].IsNaN || op == VM.CONST) {
             int nPopCode = op==VM.CALL ? traceFuncs[0].Arity : VM.Arity[op];

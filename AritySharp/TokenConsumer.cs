@@ -15,6 +15,12 @@ namespace AritySharp;
 
 public abstract class TokenConsumer
 {
+    public class EmptyTokenConsumer : TokenConsumer
+    {
+        public override void Push(Token token) { }
+    }
+    public static readonly TokenConsumer Default = new EmptyTokenConsumer();
+
     public virtual void Start() { }
 
     public abstract void Push(Token token);

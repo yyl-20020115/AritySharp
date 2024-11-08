@@ -55,7 +55,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
     public static Function MakeOpFunction(int op)
     {
         if (VM.Arity[op] != 1)
-            throw new Exception("makeOpFunction expects arity 1, found " + VM.Arity[op]);
+            throw new Exception($"makeOpFunction expects arity 1, found {VM.Arity[op]}");
         var fun = new CompiledFunction(VM.Arity[op], [VM.LOAD0, (byte)op], EMPTY_DOUBLE, EMPTY_DOUBLE, EMPTY_FUN);
         if (op == VM.ABS)
         {
@@ -150,8 +150,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
         int expected = p + 1;
         p = ExecWithoutCheck(context, p);
         if (p != expected)
-            throw new Exception("Stack pointer after exec: expected " +
-                            expected + ", got " + p);
+            throw new Exception($"Stack pointer after exec: expected {expected}, got {p}");
         context.stackRe[p - _arity] = context.stackRe[p];
         return p - _arity;
     }
@@ -161,8 +160,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
         int expected = p + 1;
         p = ExecWithoutCheckComplex(context, p, -2);
         if (p != expected)
-            throw new Exception("Stack pointer after exec: expected " +
-                            expected + ", got " + p);
+            throw new Exception($"Stack pointer after exec: expected {expected}, got {p}");
         context.stackComplex[p - _arity].Set(context.stackComplex[p]);
         return p - _arity;
     }
@@ -170,9 +168,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
     public int ExecWithoutCheck(EvalContext context, int p)
     {
         if (constsIm != null) throw IS_COMPLEX;
-
         var s = context.stackRe;
-
         int stackBase = p - _arity;
         int constp = 0;
         int funp = 0;
