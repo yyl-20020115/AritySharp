@@ -62,7 +62,7 @@ public class Profiler
             {
                 var fan = symbols.CompileWithName(arg);
                 symbols.Define(fan);
-                var f = fan.function;
+                var f = fan.Function;
                 Console.WriteLine($"{arg} : {f}");
             }
         }

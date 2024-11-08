@@ -251,13 +251,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                 case VM.MUL: s[--p] *= s[p + 1]; break;
                 case VM.DIV: s[--p] /= s[p + 1]; break;
                 case VM.MOD: s[--p] %= s[p + 1]; break;
-
-                case VM.POWER:
-                    {
-                        s[--p] = Math.Pow(s[p], s[p + 1]);
-                        break;
-                    }
-
+                case VM.POWER: s[--p] = Math.Pow(s[p], s[p + 1]); break;
                 case VM.UMIN: s[p] = -s[p]; break;
                 case VM.FACT: s[p] = MoreMath.Factorial(s[p]); break;
                 case VM.PERCENT: s[p] = s[p] * .01; percentPC = pc; break;
@@ -351,17 +345,13 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
     public int ExecWithoutCheckComplex(EvalContext context, int p, int percentPC)
     {
         var s = context.StackComplex;
-
         int stackBase = p - arity;
         int constp = 0;
         int funp = 0;
-
         int codeLen = code.Length;
-        // System.out.println("exec " + this);
         for (int pc = 0; pc < codeLen; ++pc)
         {
             int opcode = code[pc];
-            // System.out.println("+ " + pc + ' ' + opcode + ' ' + p);
             switch (opcode)
             {
                 case VM.CONST:
@@ -444,9 +434,9 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
 
                 case VM.SQRT: s[p].Sqrt(); break;
                 case VM.CBRT:
-                    if (s[p].im == 0)
+                    if (s[p].Imaginary == 0)
                     {
-                        s[p].re = Math.Cbrt(s[p].re);
+                        s[p].Real = Math.Cbrt(s[p].Real);
                     }
                     else
                     {
@@ -455,12 +445,12 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                     break;
 
                 case VM.ABS: s[p].Set(s[p].Abs(), 0); break;
-                case VM.FLOOR: s[p].Set(Math.Floor(s[p].re), 0); break;
-                case VM.CEIL: s[p].Set(Math.Ceiling(s[p].re), 0); break;
+                case VM.FLOOR: s[p].Set(Math.Floor(s[p].Real), 0); break;
+                case VM.CEIL: s[p].Set(Math.Ceiling(s[p].Real), 0); break;
                 case VM.SIGN:
                     {
-                        var a = s[p].re;
-                        var b = s[p].im;
+                        var a = s[p].Real;
+                        var b = s[p].Imaginary;
                         if (b == 0)
                         {
                             s[p].Set(a > 0 ? 1 : a < 0 ? -1 : a == 0 ? 0 : double.NaN, 0);
@@ -479,7 +469,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
 
                 case VM.MIN:
                     --p;
-                    if (s[p + 1].re < s[p].re || s[p + 1].IsNaN)
+                    if (s[p + 1].Real < s[p].Real || s[p + 1].IsNaN)
                     {
                         s[p].Set(s[p + 1]);
                     }
@@ -487,7 +477,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
 
                 case VM.MAX:
                     --p;
-                    if (s[p].re < s[p + 1].re || s[p + 1].IsNaN)
+                    if (s[p].Real < s[p + 1].Real || s[p + 1].IsNaN)
                     {
                         s[p].Set(s[p + 1]);
                     }
@@ -515,11 +505,11 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                     break;
 
                 case VM.REAL:
-                    s[p].Set(s[p].IsNaN ? double.NaN : s[p].re, 0);
+                    s[p].Set(s[p].IsNaN ? double.NaN : s[p].Real, 0);
                     break;
 
                 case VM.IMAG:
-                    s[p].Set(s[p].IsNaN ? double.NaN : s[p].im, 0);
+                    s[p].Set(s[p].IsNaN ? double.NaN : s[p].Imaginary, 0);
                     break;
 
                 default:

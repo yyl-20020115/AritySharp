@@ -263,9 +263,9 @@ public static class Util
     public static string ComplexToString(Complex x, int maxLen, int rounding)
     {
         //System.out.println("" + x.re + ' ' + x.im);
-        if (x.im == 0)
+        if (x.Imaginary == 0)
         {
-            return DoubleToString(x.re, maxLen, rounding);
+            return DoubleToString(x.Real, maxLen, rounding);
         }
 
         if (x.IsNaN)
@@ -273,7 +273,7 @@ public static class Util
             return "NaN";
         }
 
-        double xre = x.re, xim = x.im;
+        double xre = x.Real, xim = x.Imaginary;
         if (x.IsInfinite)
         {
             if (!double.IsInfinity(xre))

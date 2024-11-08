@@ -22,8 +22,8 @@ namespace AritySharp;
     from Compiler.compileWithName().
  */
 
-public class FunctionAndName(Function fun, string name)
+public class FunctionAndName(Function function, string name)
 {
-    public Function function = fun;
-    public string name = name;
+    public Function Function = function;
+    public string Name = name;
 }

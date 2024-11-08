@@ -45,7 +45,6 @@ public class SyntaxException : Exception
         this.Cause = cause;
         this.message = message;
         position = pos;
-        //fillInStackTrace();
         return this;
     }
 }

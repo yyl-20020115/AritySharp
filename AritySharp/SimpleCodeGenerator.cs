@@ -28,7 +28,7 @@ public class SimpleCodeGenerator(SyntaxException exception) : TokenConsumer
 
     public ByteStack code = new();
     public DoubleStack consts = new();
-    public FunctionStack funcs = new();
+    public FunctionStack functions = new();
 
     //string argNames[];
     Symbols? symbols;
@@ -45,7 +45,7 @@ public class SimpleCodeGenerator(SyntaxException exception) : TokenConsumer
     {
         code.Clear();
         consts.Clear();
-        funcs.Clear();
+        functions.Clear();
     }
 
     public Symbol GetSymbol(Token token)
@@ -64,11 +64,11 @@ public class SimpleCodeGenerator(SyntaxException exception) : TokenConsumer
             }
         }
         var symbol = symbols?.Lookup(name, token.arity) ?? throw exception.Set($"undefined '{name}' with arity {token.arity}", token.position);
-        if (isDerivative && symbol.op > 0 && symbol.function == Function.Default)
+        if (isDerivative && symbol.op > 0 && symbol.function == Function.Empty)
         {
             symbol.function = CompiledFunction.MakeOpFunction(symbol.op);
         }
-        if (isDerivative && symbol.function == Function.Default)
+        if (isDerivative && symbol.function == Function.Empty)
         {
             throw exception.Set($"Invalid derivative {name}", token.position);
         }
@@ -91,7 +91,7 @@ public class SimpleCodeGenerator(SyntaxException exception) : TokenConsumer
                 if (token.IsDerivative())
                 {
                     op = VM.CALL;
-                    funcs.Push(symbol.function.Derivative);
+                    functions.Push(symbol.function.Derivative);
                 }
                 else if (symbol.op > 0)
                 { // built-in
@@ -101,10 +101,10 @@ public class SimpleCodeGenerator(SyntaxException exception) : TokenConsumer
                         throw HAS_ARGUMENTS.Set("eval() on implicit function", exception.position);
                     }
                 }
-                else if (symbol.function != Function.Default)
+                else if (symbol.function != Function.Empty)
                 { // function call
                     op = VM.CALL;
-                    funcs.Push(symbol.function);
+                    functions.Push(symbol.function);
                 }
                 else
                 { // variable reference
@@ -124,5 +124,5 @@ public class SimpleCodeGenerator(SyntaxException exception) : TokenConsumer
         code.Push(op);
     }
 
-    public CompiledFunction GetFunction() => new (0, code.ToArray(), consts.GetReals(), consts.GetImaginaries(), funcs.ToArray());
+    public CompiledFunction GetFunction() => new (0, code.ToArray(), consts.Reals, consts.Imaginaries, functions.ToArray());
 }

@@ -32,10 +32,10 @@ public abstract class Function
     {
         public override int Arity => 0;
     }
-    public static readonly Function Default = new EmptyFunction();
+    public static readonly Function Empty = new EmptyFunction();
 
     private Function? cachedDerivate;
-    public string? comment;
+    public string? Comment;
 
     /**
        Gives the arity of this function. 
@@ -95,7 +95,7 @@ public abstract class Function
     public virtual Complex Eval(Complex x)
     {
         CheckArity(1);
-        return new Complex(x.im == 0 ? Eval(x.re) : double.NaN, 0);
+        return new Complex(x.Imaginary == 0 ? Eval(x.Real) : double.NaN, 0);
     }
 
     /**
@@ -104,7 +104,7 @@ public abstract class Function
     public virtual Complex Eval(Complex x, Complex y)
     {
         CheckArity(2);
-        return new Complex(x.im == 0 && y.im == 0 ? Eval(x.re, y.re) : double.NaN, 0);
+        return new Complex(x.Imaginary == 0 && y.Imaginary == 0 ? Eval(x.Real, y.Real) : double.NaN, 0);
     }
 
     /**
@@ -121,16 +121,16 @@ public abstract class Function
             case 2:
                 return Eval(args[0], args[1]);
             default:
-                int len = args.Length;
+                var len = args.Length;
                 CheckArity(len);
-                double[] reArgs = new double[len];
+                var reArgs = new double[len];
                 for (int i = args.Length - 1; i >= 0; --i)
                 {
-                    if (args[i].im != 0)
+                    if (args[i].Imaginary != 0)
                     {
                         return new Complex(double.NaN, 0);
                     }
-                    reArgs[i] = args[i].re;
+                    reArgs[i] = args[i].Real;
                 }
                 return new Complex(Eval(reArgs), 0);
         }

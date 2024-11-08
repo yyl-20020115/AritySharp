@@ -19,7 +19,7 @@ public abstract class TokenConsumer
     {
         public override void Push(Token token) { }
     }
-    public static readonly TokenConsumer Default = new EmptyTokenConsumer();
+    public static readonly TokenConsumer Empty = new EmptyTokenConsumer();
 
     public virtual void Start() { }
 

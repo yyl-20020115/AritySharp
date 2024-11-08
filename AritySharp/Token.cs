@@ -15,7 +15,7 @@ namespace AritySharp;
 
 public class Token(int id, int priority, int assoc, int vmop)
 {
-    public static readonly Token Default = new(-1, -1, -1, -1);
+    public static readonly Token Empty = new(-1, -1, -1, -1);
 
     // kind
     public const int PREFIX = 1, LEFT = 2, RIGHT = 3, SUFIX = 4;

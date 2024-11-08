@@ -217,8 +217,8 @@ public class Symbols
     public void Define(FunctionAndName funAndName)
     {
         lock (this)
-            if (funAndName.name != null)
-                Define(funAndName.name, funAndName.function);
+            if (funAndName.Name != null)
+                Define(funAndName.Name, funAndName.Function);
     }
 
     /**
@@ -238,7 +238,7 @@ public class Symbols
     public void Define(string name, Complex value)
     {
         lock (this)
-            Add(new Symbol(name, value.re, value.im, false));
+            Add(new Symbol(name, value.Real, value.Imaginary, false));
     }
 
     /**

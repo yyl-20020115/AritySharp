@@ -22,10 +22,10 @@ namespace AritySharp;
    doing constant-folding optimization.
  */
 
-public class OptCodeGen  :  SimpleCodeGenerator {
+public class OptCodeGenerator  :  SimpleCodeGenerator {
     readonly EvalContext context = new ();
-    int sp;
     readonly Complex[] stack;
+    int sp;
 
     readonly double[] traceConstsRe = new double[1];
     readonly double[] traceConstsIm = new double[1];
@@ -36,25 +36,25 @@ public class OptCodeGen  :  SimpleCodeGenerator {
     public int intrinsicArity;
     private bool isPercent;
     
-    public OptCodeGen(SyntaxException e):base(e) {
-        stack = context.StackComplex;
-        tracer
+    public OptCodeGenerator(SyntaxException e):base(e) {
+        this.stack = context.StackComplex;
+        this.tracer
         = new CompiledFunction(0, traceCode, traceConstsRe, traceConstsIm, traceFuncs);
     }
 
     //@Override
     public override void Start() {
         base.Start();
-        sp = -1;
-        intrinsicArity = 0;
-        isPercent = false;
+        this.sp = -1;
+        this.intrinsicArity = 0;
+        this.isPercent = false;
     }
 
     //@Override
     public override void Push(Token token) {
         // System.err.println("state " + getFun(0) + "; token " + token);
         var prevWasPercent = isPercent;
-        isPercent = false;
+        this.isPercent = false;
         byte op;
         switch (token.id) {
         case Lexer.NUMBER:
@@ -73,15 +73,15 @@ public class OptCodeGen  :  SimpleCodeGenerator {
                 if (op >= VM.LOAD0 && op <= VM.LOAD4) {
                     int arg = op - VM.LOAD0;
                     if (arg + 1 > intrinsicArity) {
-                        intrinsicArity = arg + 1;
+                        this.intrinsicArity = arg + 1;
                     }
-                    stack[++sp].re = double.NaN;
-                    stack[sp].im = 0;
+                    stack[++sp].Real = double.NaN;
+                    stack[sp].Imaginary = 0;
                     code.Push(op);
                     //System.out.println("op " + VM.opcodeName[op] + "; sp " + sp + "; top " + stack[sp]);
                     return;
                 }
-            } else if (symbol.function != Function.Default) { // function call
+            } else if (symbol.function != Function.Empty) { // function call
                 op = VM.CALL;
                 traceFuncs[0] = symbol.function;
             } else { // variable reference
@@ -97,17 +97,17 @@ public class OptCodeGen  :  SimpleCodeGenerator {
                 throw new Exception($"wrong vmop: {op}");
             }
             if (op == VM.PERCENT) {
-                isPercent = true;
+                this.isPercent = true;
             }
                 break;
         }
         //int oldSP = sp;
         traceCode[0] = op;
         if (op != VM.RND) {
-            sp = tracer.ExecWithoutCheckComplex(context, sp, prevWasPercent ? -1 : -2);
+            this.sp = tracer.ExecWithoutCheckComplex(context, sp, prevWasPercent ? -1 : -2);
         } else {
-            stack[++sp].re = double.NaN;
-            stack[sp].im = 0;
+            stack[++sp].Real = double.NaN;
+            stack[sp].Imaginary = 0;
         }
         //constant folding
         if (!stack[sp].IsNaN || op == VM.CONST) {
@@ -117,20 +117,21 @@ public class OptCodeGen  :  SimpleCodeGenerator {
                 if (pop == VM.CONST) {
                     consts.Pop();
                 } else if (pop == VM.CALL) {
-                    Function f = funcs.Pop();
+                    Function f = functions.Pop();
                     nPopCode += f.Arity - 1;
                 } else {
                     nPopCode += VM.Arity[pop];
                 }
                 --nPopCode;
             }
-            consts.Push(stack[sp].re, stack[sp].im);
+            consts.Push(stack[sp].Real, stack[sp].Imaginary);
             op = VM.CONST;
         } else if (op == VM.CALL) {
-            funcs.Push(traceFuncs[0]);
+            functions.Push(traceFuncs[0]);
         }
         code.Push(op);
     }
 
-    public CompiledFunction GetFun(int arity) => new(arity, code.ToArray(), consts.GetReals(), consts.GetImaginaries(), funcs.ToArray());
+    public CompiledFunction GetFunction(int arity) 
+        => new(arity, code.ToArray(), consts.Reals, consts.Imaginaries, functions.ToArray());
 }

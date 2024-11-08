@@ -25,36 +25,36 @@ public class Compiler
     private readonly Lexer lexer;
     private readonly RPN rpn;
     private readonly DeclarationParser declParser;
-    private readonly OptCodeGen codeGen;
-    private readonly SimpleCodeGenerator simpleCodeGen;
-    private readonly Declaration decl;
+    private readonly OptCodeGenerator codeGenerator;
+    private readonly SimpleCodeGenerator simpleCodeGenerator;
+    private readonly Declaration declaration;
     public Compiler()
     {
         this.exception = new();
         this.lexer = new(exception);
         this.rpn = new(exception);
         this.declParser = new(exception);
-        this.codeGen = new(exception);
-        this.simpleCodeGen = new(exception);
-        this.decl = new();
+        this.codeGenerator = new(exception);
+        this.simpleCodeGenerator = new(exception);
+        this.declaration = new();
 
     }
     public Function CompileSimple(Symbols symbols, string expression)
     {
-        this.rpn.SetConsumer(simpleCodeGen.SetSymbols(symbols));
+        this.rpn.SetConsumer(simpleCodeGenerator.SetSymbols(symbols));
         this.lexer.Scan(expression, rpn);
-        return this.simpleCodeGen.GetFunction();
+        return this.simpleCodeGenerator.GetFunction();
     }
 
     public Function Compile(Symbols symbols, string source)
     {
-        Function? fun = null;
-        decl.Parse(source, lexer, declParser);
-        if (decl.arity == DeclarationParser.UNKNOWN_ARITY)
+        Function? function = null;
+        declaration.Parse(source, lexer, declParser);
+        if (declaration.arity == DeclarationParser.UNKNOWN_ARITY)
         {
             try
             {
-                fun = new Constant(CompileSimple(symbols, decl.expression).EvalComplex());
+                function = new Constant(CompileSimple(symbols, declaration.expression).EvalComplex());
             }
             catch (SyntaxException e)
             {
@@ -66,32 +66,32 @@ public class Compiler
             }
         }
 
-        if (fun == null && decl != null)
+        if (function == null && declaration != null)
         {
             // either decl.arity was set, or an HAS_ARGUMENTS exception ocurred above
             symbols.PushFrame();
-            symbols.AddArguments(decl.args ?? []);
+            symbols.AddArguments(declaration.args ?? []);
             try
             {
-                rpn.SetConsumer(codeGen.SetSymbols(symbols));
-                lexer.Scan(decl.expression, rpn);
+                rpn.SetConsumer(codeGenerator.SetSymbols(symbols));
+                lexer.Scan(declaration.expression, rpn);
             }
             finally
             {
                 symbols.PopFrame();
             }
-            int arity = decl.arity;
+            int arity = declaration.arity;
             if (arity == DeclarationParser.UNKNOWN_ARITY)
             {
-                arity = codeGen.intrinsicArity;
+                arity = codeGenerator.intrinsicArity;
             }
-            fun = codeGen.GetFun(arity);
+            function = codeGenerator.GetFunction(arity);
         }
-        if(fun!=null)
-            fun.comment = source;
-        return fun ?? Function.Default;
+        if(function!=null)
+            function.Comment = source;
+        return function ?? Function.Empty;
     }
 
     public FunctionAndName CompileWithName(Symbols symbols, string source)
-        => new(Compile(symbols, source), decl?.name ?? "");
+        => new(Compile(symbols, source), declaration.name ?? "");
 }

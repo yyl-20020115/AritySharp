@@ -29,9 +29,9 @@ public class ByteStack
     {
         if (this.length >= data.Length)
         {
-            var newData = new byte[data.Length << 1];
-            Array.Copy(data, 0, newData, 0, data.Length);
-            this.data = newData;
+            var data = new byte[this.data.Length << 1];
+            Array.Copy(this.data, 0, data, 0, this.data.Length);
+            this.data = data;
         }
         this.data[this.length++] = value;
     }

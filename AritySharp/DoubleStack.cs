@@ -33,12 +33,12 @@ public class DoubleStack
             var newIm = new double[newSize];
             Array.Copy(re, 0, newRe, 0, re.Length);
             Array.Copy(im, 0, newIm, 0, re.Length);
-            re = newRe;
-            im = newIm;
+            this.re = newRe;
+            this.im = newIm;
         }
-        re[size] = a;
-        im[size] = b;
-        ++size;
+        this.re[size] = a;
+        this.im[size] = b;
+        ++this.size;
     }
 
     public void Pop(int cnt)
@@ -50,28 +50,23 @@ public class DoubleStack
 
     public void Pop() => --this.size;
 
-    public double[] GetReals()
+    public double[] Reals
     {
-        var trimmed = new double[size];
-        Array.Copy(re, 0, trimmed, 0, size);
-        return trimmed;
+        get
+        {
+            var values = new double[size];
+            Array.Copy(re, 0, values, 0, size);
+            return values;
+        }
     }
 
-    public double[] GetImaginaries()
+    public double[] Imaginaries
     {
-        var allZero = true;
-        for (int i = 0; i < size; ++i)
+        get
         {
-            if (this.im[i] != 0)
-            {
-                allZero = false;
-                break;
-            }
+            var values = new double[this.size];
+            Array.Copy(im, 0, values, 0, size);
+            return values;
         }
-        if (allZero) return [];
-
-        var trimmed = new double[size];
-        Array.Copy(im, 0, trimmed, 0, size);
-        return trimmed;
     }
 }

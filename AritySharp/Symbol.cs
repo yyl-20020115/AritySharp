@@ -24,7 +24,7 @@ public class Symbol
     private int arity = 0;
 
     public byte op;
-    public Function function = Function.Default;
+    public Function function = Function.Empty;
     public double valueRe, valueIm;
     public bool isConst = false;
 
@@ -74,7 +74,7 @@ public class Symbol
     public static Symbol NewEmpty(Symbol s) => new(s.name ?? "", s.arity, (byte)0, false, 0);
 
     public bool IsEmpty() => op == 0 
-        && function == Function.Default 
+        && function == Function.Empty 
         && valueRe == 0 
         && valueIm == 0;
 
