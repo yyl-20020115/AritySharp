@@ -20,27 +20,29 @@ public class ByteStack
 {
     public const byte Zero = 0;
     private byte[] data = new byte[8];
-    private int size = 0;
+    private int length = 0;
 
-    public void Clear() => size = 0;
-
-    public void Push(byte b)
+    public byte[] Data => this.data;
+    public int Length => this.length;
+    public void Clear() => this.length = 0;
+    public void Push(byte value)
     {
-        if (size >= data.Length)
+        if (this.length >= data.Length)
         {
             var newData = new byte[data.Length << 1];
             Array.Copy(data, 0, newData, 0, data.Length);
             this.data = newData;
         }
-        this.data[this.size++] = b;
+        this.data[this.length++] = value;
     }
 
-    public byte Pop() => this.size > 0 ? this.data[--this.size] : Zero;
+    public byte Pop() => this.length > 0 ? this.data[--this.length] : Zero;
 
     public byte[] ToArray()
     {
-        var trimmed = new byte[size];
-        Array.Copy(this.data, 0, trimmed, 0, size);
-        return trimmed;
+        var copy = new byte[this.length];
+        Array.Copy(this.data, 0, copy, 0, this.length);
+        return copy;
     }
+    public void Trim() => this.data = this.ToArray();
 }

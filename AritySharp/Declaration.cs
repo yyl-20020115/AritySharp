@@ -22,7 +22,7 @@ public class Declaration
     public string? name;
     public string[]? args;
     public int arity = 0;
-    public string? expression;
+    public string expression = "";
 
     public void Parse(string source, Lexer lexer, DeclarationParser declParser)
     {

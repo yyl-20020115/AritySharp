@@ -87,5 +87,5 @@ public class Symbol
 
     public override bool Equals(object? other) => other is Symbol symbol && name == (symbol.name) && arity == symbol.arity;
 
-    public override int GetHashCode() => (name ?? "").GetHashCode() + arity;
+    public override int GetHashCode() => name.GetHashCode() + arity;
 }

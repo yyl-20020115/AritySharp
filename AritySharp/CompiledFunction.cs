@@ -33,19 +33,19 @@ namespace AritySharp;
    eval() methods.
  */
 
-public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[] constsIm, Function[] funcs) : ContextFunction
+public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[] constsIm, Function[] functions) : ContextFunction
 {
     private static readonly IsComplexException IS_COMPLEX = new();
-    private static readonly Random random = new();
-    private static readonly double[] EMPTY_DOUBLE = [];
-    private static readonly Function[] EMPTY_FUN = [];
+    private static readonly double[] EMPTY_DOUBLES = [];
+    private static readonly Function[] EMPTY_FUNCTIONS = [];
     private static readonly Complex ONE_THIRD = new(1 / 3.0, 0);
+    private static readonly Random random = new();
 
-    private readonly double[] constsRe = constsRe, constsIm = constsIm;
-
-    private readonly Function[] funcs = funcs;
+    private readonly double[] constsRe = constsRe;
+    private readonly double[] constsIm = constsIm;
+    private readonly Function[] functions = functions;
     private readonly byte[] code = code;
-    private readonly int _arity = arity; // >= 0
+    private readonly int arity = arity; // >= 0
 
     private class CompareFunction : Function
     {
@@ -56,23 +56,23 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
     {
         if (VM.Arity[op] != 1)
             throw new Exception($"makeOpFunction expects arity 1, found {VM.Arity[op]}");
-        var fun = new CompiledFunction(VM.Arity[op], [VM.LOAD0, (byte)op], EMPTY_DOUBLE, EMPTY_DOUBLE, EMPTY_FUN);
+        var function = new CompiledFunction(VM.Arity[op], [VM.LOAD0, (byte)op], EMPTY_DOUBLES, EMPTY_DOUBLES, EMPTY_FUNCTIONS);
         if (op == VM.ABS)
         {
-            fun.Derivative = new CompareFunction();
+            function.Derivative = new CompareFunction();
         }
-        return fun;
+        return function;
     }
 
-    public override int Arity => _arity;
+    public override int Arity => arity;
 
     public override string ToString()
     {
         var builder = new StringBuilder();
         int cpos = 0, fpos = 0;
-        if (_arity != 0)
+        if (arity != 0)
         {
-            builder.Append("arity ").Append(_arity).Append("; ");
+            builder.Append($"arity {arity};");
         }
         for (int i = 0; i < code.Length; ++i)
         {
@@ -80,15 +80,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
             builder.Append(VM.OpcodeName[op]);
             if (op == VM.CONST)
             {
-                builder.Append(' ');
-                if (constsIm == null)
-                {
-                    builder.Append(constsRe[cpos]);
-                }
-                else
-                {
-                    builder.Append('(').Append(constsRe[cpos]).Append(", ").Append(constsIm[cpos]).Append(')');
-                }
+                builder.Append(constsIm.Length == 0 ? $" {constsRe[cpos]}" : " ({constsRe[cpos]}, {constsIm[cpos]})");
                 ++cpos;
             }
             else if (op == VM.CALL)
@@ -100,24 +92,24 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
         }
         if (cpos != constsRe.Length)
         {
-            builder.Append("\nuses only ").Append(cpos).Append(" consts out of ").Append(constsRe.Length);
+            builder.Append($"\nuses only {cpos} consts out of {constsRe.Length}");
         }
-        if (fpos != funcs.Length)
+        if (fpos != functions.Length)
         {
-            builder.Append("\nuses only ").Append(fpos).Append(" funcs out of ").Append(funcs.Length);
+            builder.Append($"\nuses only {fpos} funcs out of {functions.Length}");
         }
         return builder.ToString();
     }
 
     public override double Eval(double[] args, EvalContext context)
     {
-        if (constsIm != null) return EvalComplexToReal(args, context);
+        if (constsIm.Length > 0) return EvalComplexToReal(args, context);
         CheckArity(args.Length);
-        Array.Copy(args, 0, context.stackRe, context.stackBase, args.Length);
+        Array.Copy(args, 0, context.StackRe, context.StackBase, args.Length);
         try
         {
-            ExecReal(context, context.stackBase + args.Length - 1);
-            return context.stackRe[context.stackBase];
+            ExecReal(context, context.StackBase + args.Length - 1);
+            return context.StackRe[context.StackBase];
         }
         catch (IsComplexException)
         {
@@ -135,8 +127,8 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
     public override Complex Eval(Complex[] args, EvalContext context)
     {
         CheckArity(args.Length);
-        var stack = context.stackComplex;
-        int _base = context.stackBase;
+        var stack = context.StackComplex;
+        var _base = context.StackBase;
         for (int i = 0; i < args.Length; ++i)
         {
             stack[i + _base].Set(args[i]);
@@ -151,8 +143,8 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
         p = ExecWithoutCheck(context, p);
         if (p != expected)
             throw new Exception($"Stack pointer after exec: expected {expected}, got {p}");
-        context.stackRe[p - _arity] = context.stackRe[p];
-        return p - _arity;
+        context.StackRe[p - arity] = context.StackRe[p];
+        return p - arity;
     }
 
     private int ExecComplex(EvalContext context, int p)
@@ -161,15 +153,15 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
         p = ExecWithoutCheckComplex(context, p, -2);
         if (p != expected)
             throw new Exception($"Stack pointer after exec: expected {expected}, got {p}");
-        context.stackComplex[p - _arity].Set(context.stackComplex[p]);
-        return p - _arity;
+        context.StackComplex[p - arity].Set(context.StackComplex[p]);
+        return p - arity;
     }
 
     public int ExecWithoutCheck(EvalContext context, int p)
     {
-        if (constsIm != null) throw IS_COMPLEX;
-        var s = context.stackRe;
-        int stackBase = p - _arity;
+        if (constsIm.Length > 0) throw IS_COMPLEX;
+        var s = context.StackRe;
+        int stackBase = p - arity;
         int constp = 0;
         int funp = 0;
 
@@ -185,54 +177,55 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                     break;
                 case VM.CALL:
                     {
-                        Function f = funcs[funp++];
-                        if (f is CompiledFunction function)
+                        Function function = functions[funp++];
+                        if (function is CompiledFunction compiled_function)
                         {
-                            p = function.ExecReal(context, p);
+                            p = compiled_function.ExecReal(context, p);
                         }
                         else
                         {
-                            int arity = f.Arity;
+                            var arity = function.Arity;
                             p -= arity;
-                            double result;
-                            int prevBase = context.stackBase;
+                            var result = 0.0;
+                            var prevBase = context.StackBase;
                             try
                             {
-                                context.stackBase = p + 1;
+                                context.StackBase = p + 1;
                                 switch (arity)
                                 {
                                     case 0:
-                                        result = f.Eval();
+                                        result = function.Eval();
                                         break;
                                     case 1:
-                                        result = f.Eval(s[p + 1]);
+                                        result = function.Eval(s[p + 1]);
                                         break;
                                     case 2:
-                                        result = f.Eval(s[p + 1], s[p + 2]);
+                                        result = function.Eval(s[p + 1], s[p + 2]);
                                         break;
                                     default:
-                                        double[] args = new double[arity];
+                                        var args = new double[arity];
                                         Array.Copy(s, p + 1, args, 0, arity);
-                                        result = f.Eval(args);
+                                        result = function.Eval(args);
                                         break;
                                 }
                             }
                             finally
                             {
-                                context.stackBase = prevBase;
+                                context.StackBase = prevBase;
                             }
                             s[++p] = result;
-                            //System.out.println(": " + p + " " + s[0] + " " + s[1] + " " + s[2]);
                         }
                         break;
                     }
 
-                case VM.RND: s[++p] = random.NextDouble(); break;
+                case VM.RND: 
+                    s[++p] = random.NextDouble(); 
+                    break;
 
                 case VM.ADD:
                     {
-                        double a = s[--p];
-                        double res = a + (percentPC == pc - 1 ? s[p] * s[p + 1] : s[p + 1]);
+                        var a = s[--p];
+                        var res = a + (percentPC == pc - 1 ? s[p] * s[p + 1] : s[p + 1]);
                         if (Math.Abs(res) < Util.MathUlp(a) * 1024)
                         {
                             // hack for "1.1-1-.1"
@@ -244,8 +237,8 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
 
                 case VM.SUB:
                     {
-                        double a = s[--p];
-                        double res = a - (percentPC == pc - 1 ? s[p] * s[p + 1] : s[p + 1]);
+                        var a = s[--p];
+                        var res = a - (percentPC == pc - 1 ? s[p] * s[p + 1] : s[p + 1]);
                         if (Math.Abs(res) < Util.MathUlp(a) * 1024)
                         {
                             // hack for "1.1-1-.1"
@@ -268,14 +261,13 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                 case VM.UMIN: s[p] = -s[p]; break;
                 case VM.FACT: s[p] = MoreMath.Factorial(s[p]); break;
                 case VM.PERCENT: s[p] = s[p] * .01; percentPC = pc; break;
-
                 case VM.SIN: s[p] = MoreMath.Sin(s[p]); break;
                 case VM.COS: s[p] = MoreMath.Cos(s[p]); break;
                 case VM.TAN: s[p] = MoreMath.Tan(s[p]); break;
 
                 case VM.ASIN:
                     {
-                        double v = s[p];
+                        var v = s[p];
                         if (v < -1 || v > 1)
                         {
                             throw IS_COMPLEX;
@@ -286,7 +278,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
 
                 case VM.ACOS:
                     {
-                        double v = s[p];
+                        var v = s[p];
                         if (v < -1 || v > 1)
                         {
                             throw IS_COMPLEX;
@@ -296,20 +288,17 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                     }
 
                 case VM.ATAN: s[p] = Math.Atan(s[p]); break;
-
                 case VM.EXP: s[p] = Math.Exp(s[p]); break;
                 case VM.LN: s[p] = Math.Log(s[p]); break;
-
                 case VM.SQRT:
                     {
-                        double v = s[p];
+                        var v = s[p];
                         if (v < 0) { throw IS_COMPLEX; }
                         s[p] = Math.Sqrt(v);
                         break;
                     }
 
                 case VM.CBRT: s[p] = Math.Cbrt(s[p]); break;
-
                 case VM.SINH: s[p] = Math.Sinh(s[p]); break;
                 case VM.COSH: s[p] = Math.Cosh(s[p]); break;
                 case VM.TANH: s[p] = Math.Tanh(s[p]); break;
@@ -322,7 +311,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                 case VM.CEIL: s[p] = Math.Ceiling(s[p]); break;
                 case VM.SIGN:
                     {
-                        double v = s[p];
+                        var v = s[p];
                         s[p] = v > 0 ? 1 : v < 0 ? -1 : v == 0 ? 0 : double.NaN;
                         break;
                     }
@@ -353,7 +342,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                     break;
 
                 default:
-                    throw new Exception("Unknown opcode " + opcode);
+                    throw new Exception($"Unknown opcode {opcode}");
             }
         }
         return p;
@@ -361,9 +350,9 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
 
     public int ExecWithoutCheckComplex(EvalContext context, int p, int percentPC)
     {
-        var s = context.stackComplex;
+        var s = context.StackComplex;
 
-        int stackBase = p - _arity;
+        int stackBase = p - arity;
         int constp = 0;
         int funp = 0;
 
@@ -377,47 +366,47 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
             {
                 case VM.CONST:
                     ++p;
-                    s[p].Set(constsRe[constp], constsIm == null ? 0 : constsIm[constp]);
+                    s[p].Set(constsRe[constp], constsIm.Length == 0 ? 0 : constsIm[constp]);
                     ++constp;
                     break;
 
                 case VM.CALL:
                     {
-                        var f = funcs[funp++];
-                        if (f is CompiledFunction function)
+                        var function = functions[funp++];
+                        if (function is CompiledFunction compiled_function)
                         {
-                            p = function.ExecComplex(context, p);
+                            p = compiled_function.ExecComplex(context, p);
                         }
                         else
                         {
-                            int arity = f.Arity;
+                            var arity = function.Arity;
                             p -= arity;
                             Complex result;
-                            int prevBase = context.stackBase;
+                            var prevBase = context.StackBase;
                             try
                             {
-                                context.stackBase = p + 1;
+                                context.StackBase = p + 1;
                                 switch (arity)
                                 {
                                     case 0:
-                                        result = new Complex(f.Eval(), 0);
+                                        result = new Complex(function.Eval(), 0);
                                         break;
                                     case 1:
-                                        result = f.Eval(s[p + 1]);
+                                        result = function.Eval(s[p + 1]);
                                         break;
                                     case 2:
-                                        result = f.Eval(s[p + 1], s[p + 2]);
+                                        result = function.Eval(s[p + 1], s[p + 2]);
                                         break;
                                     default:
                                         var args = new Complex[arity];
                                         Array.Copy(s, p + 1, args, 0, arity);
-                                        result = f.Eval(args);
+                                        result = function.Eval(args);
                                         break;
                                 }
                             }
                             finally
                             {
-                                context.stackBase = prevBase;
+                                context.StackBase = prevBase;
                             }
                             s[++p].Set(result);
                         }
@@ -425,7 +414,6 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                     }
 
                 case VM.RND: s[++p].Set(random.NextDouble(), 0); break;
-
                 case VM.ADD: s[--p].Add(percentPC == pc - 1 ? s[p + 1].Mul(s[p]) : s[p + 1]); break;
                 case VM.SUB: s[--p].Sub(percentPC == pc - 1 ? s[p + 1].Mul(s[p]) : s[p + 1]); break;
                 case VM.MUL: s[--p].Mul(s[p + 1]); break;
@@ -471,15 +459,15 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                 case VM.CEIL: s[p].Set(Math.Ceiling(s[p].re), 0); break;
                 case VM.SIGN:
                     {
-                        double a = s[p].re;
-                        double b = s[p].im;
+                        var a = s[p].re;
+                        var b = s[p].im;
                         if (b == 0)
                         {
                             s[p].Set(a > 0 ? 1 : a < 0 ? -1 : a == 0 ? 0 : double.NaN, 0);
                         }
                         else if (!s[p].IsNaN)
                         {
-                            double abs = s[p].Abs();
+                            var abs = s[p].Abs();
                             s[p].Set(a / abs, b / abs);
                         }
                         else
@@ -535,7 +523,7 @@ public class CompiledFunction(int arity, byte[] code, double[] constsRe, double[
                     break;
 
                 default:
-                    throw new Exception("Unknown opcode " + opcode);
+                    throw new Exception($"Unknown opcode {opcode}");
             }
         }
         return p;

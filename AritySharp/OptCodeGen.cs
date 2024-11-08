@@ -22,7 +22,7 @@ namespace AritySharp;
    doing constant-folding optimization.
  */
 
-public class OptCodeGen  :  SimpleCodeGen {
+public class OptCodeGen  :  SimpleCodeGenerator {
     readonly EvalContext context = new ();
     int sp;
     readonly Complex[] stack;
@@ -37,7 +37,7 @@ public class OptCodeGen  :  SimpleCodeGen {
     private bool isPercent;
     
     public OptCodeGen(SyntaxException e):base(e) {
-        stack = context.stackComplex;
+        stack = context.StackComplex;
         tracer
         = new CompiledFunction(0, traceCode, traceConstsRe, traceConstsIm, traceFuncs);
     }
@@ -132,5 +132,5 @@ public class OptCodeGen  :  SimpleCodeGen {
         code.Push(op);
     }
 
-    public CompiledFunction GetFun(int arity) => new(arity, code.ToArray(), consts.GetRe(), consts.GetIm(), funcs.ToArray());
+    public CompiledFunction GetFun(int arity) => new(arity, code.ToArray(), consts.GetReals(), consts.GetImaginaries(), funcs.ToArray());
 }

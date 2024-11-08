@@ -57,37 +57,37 @@ public class Symbols
 
     static Symbols()
     {
-        List<Symbol> vect = [];
+        List<Symbol> symbols = [];
         foreach (byte i in VM.Builtins)
         {
-            vect.Add(Symbol.MakeVmOp(VM.OpcodeName[i], i));
+            symbols.Add(Symbol.MakeVmOp(VM.OpcodeName[i], i));
         }
 
         string[] IMPLICIT_ARGS = ["x", "y", "z"];
         for (byte i = 0; i < IMPLICIT_ARGS.Length; ++i)
         {
-            vect.Add(Symbol.MakeArg(IMPLICIT_ARGS[i], i));
+            symbols.Add(Symbol.MakeArg(IMPLICIT_ARGS[i], i));
         }
 
-        vect.Add(new Symbol("pi", Math.PI, true));
-        vect.Add(new Symbol("\u03c0", Math.PI, true));
-        vect.Add(new Symbol("e", Math.E, true));
+        symbols.Add(new Symbol("pi", Math.PI, true));
+        symbols.Add(new Symbol("\u03c0", Math.PI, true));
+        symbols.Add(new Symbol("e", Math.E, true));
 
         double infinity = double.PositiveInfinity;
-        vect.Add(new Symbol("Infinity", infinity, true));
-        vect.Add(new Symbol("infinity", infinity, true));
-        vect.Add(new Symbol("Inf", infinity, true));
-        vect.Add(new Symbol("inf", infinity, true));
-        vect.Add(new Symbol("\u221e", infinity, true));
-        vect.Add(new Symbol("NaN", double.NaN, true));
-        vect.Add(new Symbol("nan", double.NaN, true));
+        symbols.Add(new Symbol("Infinity", infinity, true));
+        symbols.Add(new Symbol("infinity", infinity, true));
+        symbols.Add(new Symbol("Inf", infinity, true));
+        symbols.Add(new Symbol("inf", infinity, true));
+        symbols.Add(new Symbol("\u221e", infinity, true));
+        symbols.Add(new Symbol("NaN", double.NaN, true));
+        symbols.Add(new Symbol("nan", double.NaN, true));
 
-        vect.Add(new Symbol("i", 0, 1, true));
-        vect.Add(new Symbol("j", 0, 1, false));
+        symbols.Add(new Symbol("i", 0, 1, true));
+        symbols.Add(new Symbol("j", 0, 1, false));
 
-        int size = vect.Count;
+        int size = symbols.Count;
         builtin = new Symbol[size];
-        vect.CopyTo(builtin);
+        symbols.CopyTo(builtin);
     }
 
     /**

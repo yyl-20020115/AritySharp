@@ -26,7 +26,7 @@ public class Compiler
     private readonly RPN rpn;
     private readonly DeclarationParser declParser;
     private readonly OptCodeGen codeGen;
-    private readonly SimpleCodeGen simpleCodeGen;
+    private readonly SimpleCodeGenerator simpleCodeGen;
     private readonly Declaration decl;
     public Compiler()
     {
@@ -43,7 +43,7 @@ public class Compiler
     {
         this.rpn.SetConsumer(simpleCodeGen.SetSymbols(symbols));
         this.lexer.Scan(expression, rpn);
-        return this.simpleCodeGen.GetFun();
+        return this.simpleCodeGen.GetFunction();
     }
 
     public Function Compile(Symbols symbols, string source)
@@ -54,11 +54,11 @@ public class Compiler
         {
             try
             {
-                fun = new Constant(CompileSimple(symbols, decl.expression??"").EvalComplex());
+                fun = new Constant(CompileSimple(symbols, decl.expression).EvalComplex());
             }
             catch (SyntaxException e)
             {
-                if (e != null && e != SimpleCodeGen.HAS_ARGUMENTS)
+                if (e != null && e != SimpleCodeGenerator.HAS_ARGUMENTS)
                 {
                     throw;
                 }
@@ -74,7 +74,7 @@ public class Compiler
             try
             {
                 rpn.SetConsumer(codeGen.SetSymbols(symbols));
-                lexer.Scan(decl.expression ?? "", rpn);
+                lexer.Scan(decl.expression, rpn);
             }
             finally
             {

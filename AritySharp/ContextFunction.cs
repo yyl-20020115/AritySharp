@@ -19,11 +19,11 @@ public abstract class ContextFunction : Function
                 argsC = NO_ARGS_COMPLEX;
                 break;
             case 1:
-                argsC = context.args1c;
+                argsC = context.Args1c;
                 argsC[0].Set(args[0], 0);
                 break;
             case 2:
-                argsC = context.args2c;
+                argsC = context.Args2c;
                 argsC[0].Set(args[0], 0);
                 argsC[1].Set(args[1], 0);
                 break;
@@ -67,14 +67,14 @@ public abstract class ContextFunction : Function
 
     public double Eval(double x, EvalContext context)
     {
-        var args = context.args1;
+        var args = context.Args1;
         args[0] = x;
         return Eval(args, context);
     }
 
     public double Eval(double x, double y, EvalContext context)
     {
-        var args = context.args2;
+        var args = context.Args2;
         args[0] = x;
         args[1] = y;
         return Eval(args, context);
@@ -108,14 +108,14 @@ public abstract class ContextFunction : Function
 
     public Complex Eval(Complex x, EvalContext context)
     {
-        var args = context.args1c;
+        var args = context.Args1c;
         args[0] = x;
         return Eval(args, context);
     }
 
     public Complex Eval(Complex x, Complex y, EvalContext context)
     {
-        var args = context.args2c;
+        var args = context.Args2c;
         args[0] = x;
         args[1] = y;
         return Eval(args, context);

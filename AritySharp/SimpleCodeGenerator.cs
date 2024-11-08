@@ -22,7 +22,7 @@ namespace AritySharp;
    without any optimization.
  */
 
-public class SimpleCodeGen(SyntaxException exception) : TokenConsumer
+public class SimpleCodeGenerator(SyntaxException exception) : TokenConsumer
 {
     public static readonly SyntaxException HAS_ARGUMENTS = new();
 
@@ -32,9 +32,9 @@ public class SimpleCodeGen(SyntaxException exception) : TokenConsumer
 
     //string argNames[];
     Symbols? symbols;
-    private SyntaxException exception = exception;
+    private readonly SyntaxException exception = exception;
 
-    public SimpleCodeGen SetSymbols(Symbols symbols)
+    public SimpleCodeGenerator SetSymbols(Symbols symbols)
     {
         this.symbols = symbols;
         return this;
@@ -124,11 +124,5 @@ public class SimpleCodeGen(SyntaxException exception) : TokenConsumer
         code.Push(op);
     }
 
-    public CompiledFunction GetFun() => new (0, code.ToArray(), consts.GetRe(), consts.GetIm(), funcs.ToArray());
-
-    /*
-    double getValue() {
-        return new CompiledFunction(0, code.toArray(), consts.getRe(), consts.getIm(), funcs.toArray()).eval();
-    }
-    */
+    public CompiledFunction GetFunction() => new (0, code.ToArray(), consts.GetReals(), consts.GetImaginaries(), funcs.ToArray());
 }
